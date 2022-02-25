@@ -19,7 +19,7 @@
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 .data 
-A: .word 1
+A: .word 7
 B: .word 5
 
 .text
@@ -42,13 +42,13 @@ jr $ra               	# e retorno
 main:               	 
 add $a0, $zero, $t0    	# O primeiro argumento continua com o mesmo valor inicial
 add $a1, $a1, $t1   	# E o segundo argumento recebe o valor anterior - 1
-addi $t1, $t1, -1	# subtrai 1 do valor que vai ser/e o segundo argumento
+addi $t1, $t1, -1	    # subtrai 1 do valor que vai ser/e o segundo argumento
 jal soma            	# chamo a funcao recursiva de soma
 lw $a0, 0($sp)      	# Controle da pilha
-lw $a1, 4($sp)
-lw $ra, 8($sp) 
-addi $sp, $sp, 12
-j fim
+lw $a1, 4($sp)          # Controle da pilha
+lw $ra, 8($sp)          # Controle da pilha
+addi $sp, $sp, 12       # Controle da pilha
+j fim                   # Encerro o programa
 
 AmaiorB:
 addi $v1, $v1, 1 

@@ -10,9 +10,9 @@ lw $t1, B # ponto B
 lw $t2, C # ponto C
 lw $t3, r # valor de R 
 
-add $s0, $t0, $t1 # $s0 recebe a soma de A + B -> 
-add $s1, $t0, $t2 # $s1 recebe a soma de A + C -> 
-add $s2, $t1, $t2 # $s3 recebe a soma de B + C -> 
+add $s0, $t0, $t1 # $s0 recebe a soma de A + B
+add $s1, $t0, $t2 # $s1 recebe a soma de A + C 
+add $s2, $t1, $t2 # $s3 recebe a soma de B + C 
 
 blt $s0, $t2, naoEhTriangulo # caso (A + B) < C nao e um triangulo
 blt $s1, $t1, naoEhTriangulo # caso (A + C) < B nao e um triangulo
@@ -45,7 +45,7 @@ addi $s3, $t3, 3 # coloco no registrador $s3 o valor 3 (ja que $t3 tem 0)
 sw $s3, r
 j fim
 
-naoEhTriangulo:
+naoEhTriangulo: # E caso nao seja triangulo, apenas armazeno o resultado igual a 0
 sw $s3, r
 j fim
 
