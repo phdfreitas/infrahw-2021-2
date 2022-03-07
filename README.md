@@ -16,7 +16,7 @@
 - [x] mflo rd
 - [x] sll rd, rt, shamt 
 - [x] sllv rd, rs, rt 
-- [] slt rd, rs, rt 
+- [x] slt rd, rs, rt 
 - [x] sra rd, rt, shamt 
 - [x] srav rd, rs, rt
 - [x] srl rd, rt, shamt 
