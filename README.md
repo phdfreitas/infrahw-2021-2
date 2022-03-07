@@ -17,8 +17,8 @@
 - [x] sll rd, rt, shamt 
 - [x] sllv rd, rs, rt 
 - [] slt rd, rs, rt 
-- [] sra rd, rt, shamt 
-- [] srav rd, rs, rt
+- [x] sra rd, rt, shamt 
+- [x] srav rd, rs, rt
 - [x] srl rd, rt, shamt 
 - [x] sub rd, rs, rt
 - [] break
@@ -29,7 +29,7 @@
 - [] addi rt, rs imediato
 - [] addiu rt, rs imediato
 - [x] beq rs,rt, offset
-- [] bne rs,rt, offset
+- [x] bne rs,rt, offset
 - [x] ble rs,rt,offset
 - [x] bgt rs,rt,offset
 - [] sllm rt, offset(rs)
