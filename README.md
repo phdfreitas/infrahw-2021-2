@@ -23,7 +23,7 @@
 - [x] sub rd, rs, rt
 - [] break
 - [x] Rte 
-- [] addm rd, rs,rt
+- [x] addm rd, rs,rt
 
 ## Formato I
 - [x] addi rt, rs imediato
