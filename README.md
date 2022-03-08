@@ -11,7 +11,7 @@
 - [x] and rd, rs, rt 
 - [x] div rs, rt 
 - [x] mult rs,rt 
-- [] jr rs 0x0 rs # Não tenho certeza se está feito
+- [x] jr rs 0x0 rs 
 - [x] mfhi rd
 - [x] mflo rd
 - [x] sll rd, rt, shamt 
@@ -26,22 +26,22 @@
 - [] addm rd, rs,rt
 
 ## Formato I
-- [] addi rt, rs imediato
-- [] addiu rt, rs imediato
+- [x] addi rt, rs imediato
+- [x] addiu rt, rs imediato
 - [x] beq rs,rt, offset
 - [x] bne rs,rt, offset
 - [x] ble rs,rt,offset
 - [x] bgt rs,rt,offset
-- [] sllm rt, offset(rs)
+- [x] sllm rt, offset(rs)
 - [] lb rt, offset(rs)  
 - [] lh rt, offset(rs) 
-- [] lui rt, imediato  
+- [x] lui rt, imediato  
 - [x] lw rt, offset(rs) 
 - [] sb rt, offset(rs)
 - [] sh rt, offset(rs) 
-- [] slti rt, rs, imediato
+- [x] slti rt, rs, imediato
 - [x] sw rt, offset(rs) 
 
 # Formato J
 - [x] j offset
-- [x] jal offset
+- [] jal offset
