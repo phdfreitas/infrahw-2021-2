@@ -21,7 +21,7 @@
 - [x] srav rd, rs, rt
 - [x] srl rd, rt, shamt 
 - [x] sub rd, rs, rt
-- [] break
+- [x] break
 - [x] Rte 
 - [x] addm rd, rs,rt
 
@@ -33,12 +33,12 @@
 - [x] ble rs,rt,offset
 - [x] bgt rs,rt,offset
 - [x] sllm rt, offset(rs)
-- [] lb rt, offset(rs)  
-- [] lh rt, offset(rs) 
+- [x] lb rt, offset(rs)  
+- [x] lh rt, offset(rs) 
 - [x] lui rt, imediato  
 - [x] lw rt, offset(rs) 
-- [] sb rt, offset(rs)
-- [] sh rt, offset(rs) 
+- [x] sb rt, offset(rs)
+- [x] sh rt, offset(rs) 
 - [x] slti rt, rs, imediato
 - [x] sw rt, offset(rs) 
 
