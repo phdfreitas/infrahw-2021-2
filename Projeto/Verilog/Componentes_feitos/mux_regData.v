@@ -1,5 +1,5 @@
 - falta verificar os bites de entrada 
-module max_regData (
+module mux_regData (
     input  wire  [2:0]    selector,     --MenToReg
     input  wire  [31:0]   Data_0,
     input  wire  [31:0]   Data_1,

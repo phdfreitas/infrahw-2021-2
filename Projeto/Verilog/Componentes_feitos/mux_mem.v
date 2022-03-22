@@ -1,5 +1,5 @@
 -- falta verificar os bites de entrada 
-module max_mem (
+module mux_mem (
     input  wire  [2:0]    selector,     --IorD
     input  wire  [31:0]   Data_0,
     input  wire  [31:0]   Data_4,
