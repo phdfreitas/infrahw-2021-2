@@ -1,12 +1,13 @@
 -- falta verificar os bites de entrada e os numeros negativos
+// primeiro modulo ta feito, falta verificar esse OX E IX
 
 module mux_aluLogic (
     input  wire    [1:0]   selector,
-    input  wire    [31:0]  Data_0,
-    input  wire    [31:0]  Data_1,
-    input  wire    [31:0]  Data_2,
-    input  wire    [31:0]  Data_3, 
-    output wire    [31:0]  Data_out 
+    input  wire    Data_0,
+    input  wire    Data_1,
+    input  wire    Data_2,
+    input  wire    Data_3, 
+    output wire    Data_out 
 );
 
     wire [31:0] OX;
