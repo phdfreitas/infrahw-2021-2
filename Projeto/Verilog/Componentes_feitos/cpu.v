@@ -33,14 +33,16 @@ module cpu (
     wire [31:0] RegB_out;
     wire [31:0] ALUOut_out;
     wire [31:0] MDR_out;
-    wire [??:0] LS_out;   // ***LS_OUT PROVAVELMENTE VAI PRECISAR DE UMA SAIDA PARA CADA TAMANHO QUE ELE CARREGA***
+    //wire [??:0] LS_out;    ***LS_OUT pode ter varios tamanhos, n sei como faz os bits pra ele*** (e ainda falta fazer o LOAD SIZE)
     wire [31:0] REGS_out1;
     wire [31:0] REGS_out2;
     wire [31:0] SL2_out;
     wire [31:0] SE16_32_out;
     wire [31:0] SE1_32_out
     wire [31:0] EPC_out;
-    wire mux_branch_out;    //output desse mux tem só 1 bit mesmo
+    wire mux_branch_out;
+    wire zero_not_out;
+    wire GT_not_out;
 
     wire [5:0] OPCODE;
     wire [4:0] RS;
@@ -92,7 +94,7 @@ module cpu (
         MEM_out
     );
 
-    /*mux ?? SC_ (
+    /*store_control SC_ (
         selector,
         data_B,
         data_data,
@@ -120,13 +122,13 @@ module cpu (
         SE1_32_out
     );
 
-    RegDesloc shift_left2 (   //ver como usa o RegDesloc (ta nos componentes dados)
+    /*RegDesloc shift_left2 (   //ver como usa o RegDesloc (ta nos componentes dados)
         ???????
         ???????
         ???????
         ???????
         SL2_out
-    );
+    );*/
 
     Registrador MDR_ (
         clk,
@@ -140,7 +142,7 @@ module cpu (
         ????
         ????
         ????
-        LS_out     // provavelmente vai ter um LS_out pra cada quantia de bit
+        LS_out
     );
 
     mux_regDst M_DST_ (
@@ -220,7 +222,7 @@ module cpu (
 		LT							//-- Sinaliza se A<B
     );
 
-    mux_ALU_control ALUCTRL_(
+    ALU_control ALUCTRL_(
         //input  wire    [1:0]   selector,
         //input  wire    [2:0]   ALU_op,
         //input  wire    [5:0]   funct,
@@ -249,21 +251,49 @@ module cpu (
         ALU_result,
         ALUOut_out,
         EPC_out,
-        Data_3,     //   *** entrada da concatenacao de PC com os bits de JUMP, tem que ver como funciona isso ***
-        //LS32_OUT,    ------ precisa fazer o LOADSIZE ainda
+        Data_3,     //mudar o nome   *** entrada da concatenacao de PC com os bits de JUMP, tem que ver como funciona isso ***
+        //LS_OUT,    ------ precisa fazer o LOADSIZE ainda
         RegA_out, 
         mux_PCSource_out 
 
     );
 
+    not ZNOT_ (
+        zero,
+        zero_not_out
+    );
+
+    not GTNOT_ (
+        GT,
+        GT_not_out
+    );
+
     mux_aluLogic M_BRANCH_ (
         ALULogic,
         zero,
-        //zero_not_out,         ***to assumindo q vamos ter que criar um componente not***
+        zero_not_out,
         GT,
-        //GT_not_out,           ***to assumindo q vamos ter que criar um componente not***
-         mux_branch_out
-    )
+        GT_not_out,
+        mux_branch_out
+    );
+
+
+    // DIV E SHAMT
+
+    /*mux_shamtControl M_SC_ (
+        nput  wire     [1:0]   selector,
+        input  wire    [10:0]  Data_0,    --shamt[10:6]
+        input  wire    [31:0]  Data_2,    
+        input  wire    [31:0]  Data_3,    --B
+        output wire    [31:0]  Data_out 
+
+    );*/
+
+    Registrador SHIFT_REG_ ( // É Registrador? mas tem 2 entradas entao deu ruim pq n é igual ao registrador fornecido
+
+
+    );
+
 
 
 endmodule
