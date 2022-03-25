@@ -1,7 +1,7 @@
 module load_size(
-    input wire  [1:0]   load_size_control, 
-    input wire  [31:0]  mdr_input,
-    output wire  [31:0]  load_size_out;
+    input   wire  [1:0]   load_size_control, 
+    input   wire  [31:0]  mdr_input,
+    output  wire  [31:0]  load_size_out;
 );
     
     wire [31:0] LHB; // valor de lh ou lb
@@ -11,5 +11,4 @@ module load_size(
 
     // caso o valor do bit mais a esquerda seja 1, então é lb, caso contrário, é o valor de lhb
     assign load_size_out = (load_size_control[1]) ? {{24{0}}, mdr_input[7:0]} : LHB;  
-
 endmodule
