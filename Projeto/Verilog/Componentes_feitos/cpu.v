@@ -22,6 +22,8 @@ module cpu (
     wire [1:0] ALUSourceA;
     wire [2:0] ALUSourceB;
     wire [2:0] PCSource;
+    wire [1:0] store_control_sign;
+    wire [1:0] load_size_control
 
     wire Overflow;
 
@@ -33,13 +35,14 @@ module cpu (
     wire [31:0] RegB_out;
     wire [31:0] ALUOut_out;
     wire [31:0] MDR_out;
-    //wire [??:0] LS_out;    ***LS_OUT pode ter varios tamanhos, n sei como faz os bits pra ele*** (e ainda falta fazer o LOAD SIZE)
+    wire [31:0] LS_out;
     wire [31:0] REGS_out1;
     wire [31:0] REGS_out2;
     wire [31:0] SL2_out;
     wire [31:0] SE16_32_out;
     wire [31:0] SE1_32_out
     wire [31:0] EPC_out;
+    wire [31:0] SC_out;
     wire mux_branch_out;
     wire zero_not_out;
     wire GT_not_out;
@@ -90,16 +93,16 @@ module cpu (
         mux_IorD_out,
         clk,
         MEMRead,     // 0 = LER || 1 = ESCREVER
-        //SC_out,
+        SC_out,
         MEM_out
     );
 
-    /*store_control SC_ (
-        selector,
-        data_B,
-        data_data,
-        SC_out
-    )*/
+    store_control SC_ (
+        RegB_out,        // Menos significativos
+        MDR_out,
+        store_control_sign,
+        SC_out;
+    )
 
     Instr_Reg IR_ (
         clk,
@@ -122,13 +125,14 @@ module cpu (
         SE1_32_out
     );
 
-    /*RegDesloc shift_left2 (   //ver como usa o RegDesloc (ta nos componentes dados)
-        ???????
-        ???????
-        ???????
-        ???????
-        SL2_out
-    );*/
+    RegDesloc shift_left2_offset (
+        Clk,
+		Reset,
+		3'b010,
+		5'b00010,
+		SE16_32_out,
+		SL2_out
+    );
 
     Registrador MDR_ (
         clk,
@@ -138,10 +142,9 @@ module cpu (
         MDR_out
     );
 
-    load_size LS_ ( // precisamos criar um load_size que faça as coisas que a gente considerou que ele faz
-        ????
-        ????
-        ????
+    load_size LS_ (
+        load_size_control,
+        MEM_out,
         LS_out
     );
 
@@ -149,7 +152,7 @@ module cpu (
         RegDst,
         RT,
         OFFSET, 
-        mux_regDst_out;
+        mux_regDst_out
     );
 
     mux_regData M_RDATA_ (
@@ -252,7 +255,7 @@ module cpu (
         ALUOut_out,
         EPC_out,
         Data_3,     //mudar o nome   *** entrada da concatenacao de PC com os bits de JUMP, tem que ver como funciona isso ***
-        //LS_OUT,    ------ precisa fazer o LOADSIZE ainda
+        LS_out,    ------ precisa fazer o LOADSIZE ainda
         RegA_out, 
         mux_PCSource_out 
 
