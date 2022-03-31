@@ -1,4 +1,4 @@
-module ALU_control (
+module F_ALU_control (
     input  wire            selector,
     input  wire    [2:0]   ALU_op,
     input  wire    [5:0]   funct,

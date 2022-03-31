@@ -1,5 +1,4 @@
--- falta verificar os bites de entrada 
-module mux_hi (
+module F_mux_lo (
     input  wire            selector,
     input  wire    [31:0]  Data_0,
     input  wire    [31:0]  Data_1, 

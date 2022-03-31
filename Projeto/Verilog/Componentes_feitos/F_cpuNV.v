@@ -1,4 +1,4 @@
-module cpu (
+module F_cpu (
     input wire clk,
     input wire reset
 );

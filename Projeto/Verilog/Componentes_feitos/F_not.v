@@ -1,4 +1,4 @@
-module not (
+module F_not (
     input wire     data_in,
     output wire    data_out
 );

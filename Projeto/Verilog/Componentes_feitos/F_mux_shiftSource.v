@@ -1,8 +1,7 @@
--- falta verificar os bites de entrada 
-module mux_lo (
+module F_mux_shiftSource (
     input  wire            selector,
     input  wire    [31:0]  Data_0,
-    input  wire    [31:0]  Data_1, 
+    input  wire    [31:0]  Data_1,
     output wire    [31:0]  Data_out 
 );
 

@@ -1,5 +1,4 @@
-// Talvez tenha que fazer algo em relaçao a Data_3, ja que essa entrada vem da concatenacao de PC(4 bits) com o jump (28 bits)
-module mux_pcSource (
+module F_mux_pcSource (
     input  wire    [2:0]   selector,
     input  wire    [31:0]  Data_0,
     input  wire    [31:0]  Data_1,

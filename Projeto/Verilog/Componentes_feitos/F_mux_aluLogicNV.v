@@ -1,7 +1,7 @@
 -- falta verificar os bites de entrada e os numeros negativos
 // primeiro modulo ta feito, falta verificar esse OX E IX
 
-module mux_aluLogic (
+module F_mux_aluLogic (
     input  wire    [1:0]   selector,
     input  wire    Data_0,
     input  wire    Data_1,

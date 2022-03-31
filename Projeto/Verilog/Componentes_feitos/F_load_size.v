@@ -1,7 +1,7 @@
-module load_size(
+module F_load_size(
     input   wire  [1:0]   load_size_control, 
     input   wire  [31:0]  mdr_input,
-    output  wire  [31:0]  load_size_out;
+    output  wire  [31:0]  load_size_out
 );
     
     wire [31:0] LHB; // valor de lh ou lb

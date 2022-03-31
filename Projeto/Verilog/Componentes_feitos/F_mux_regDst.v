@@ -1,4 +1,4 @@
-module mux_regDst (
+module F_mux_regDst (
     input  wire    [1:0]   selector,
     input  wire    [5:0]   Data_0,
     input  wire    [15:0]  Data_3, 
