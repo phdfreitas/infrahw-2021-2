@@ -43,7 +43,7 @@ module F_cpu (
     wire [31:0] REGS_out2;
     wire [31:0] SL2_out;
     wire [31:0] SE16_32_out;
-    wire [31:0] SE1_32_out
+    wire [31:0] SE1_32_out;
     wire [31:0] EPC_out;
     wire [31:0] SC_out;
     wire mux_branch_out;
@@ -118,8 +118,8 @@ module F_cpu (
         RegB_out,        // Menos significativos
         MDR_out,
         store_control_sign,
-        SC_out;
-    )
+        SC_out
+    );
 
     Instr_Reg IR_ (
         clk,
@@ -233,14 +233,14 @@ module F_cpu (
 
     ula32 ALU_ (
         mux_aluA_out, 				//-- Operando A da ULA
-		mux_aluB_out 				//-- Operando B da ULA
-		ALU_control 		        //-- Seletor da opera��o da ULA
-		ALU_result 				    //-- Resultado da opera��o (SOMA, SUB, AND, NOT, INCREMENTO, XOR)  
-		Overflow 				    //-- Sinaliza overflow aritm�tico
-		Negativo  //NAO USAMOS	    //-- Sinaliza valor negativo
-		zero 						//-- Sinaliza quando S for zero
-		Igual	//NAO USAMOS		  -- Sinaliza se A=B
-		GT							//-- Sinaliza se A>B
+		mux_aluB_out, 				//-- Operando B da ULA
+		ALU_control, 		        //-- Seletor da opera��o da ULA
+		ALU_result, 				    //-- Resultado da opera��o (SOMA, SUB, AND, NOT, INCREMENTO, XOR)  
+		Overflow, 				    //-- Sinaliza overflow aritm�tico
+		Negativo,  //NAO USAMOS	    //-- Sinaliza valor negativo
+		zero, 						//-- Sinaliza quando S for zero
+		Igual,	//NAO USAMOS		  -- Sinaliza se A=B
+		GT,							//-- Sinaliza se A>B
 		LT							//-- Sinaliza se A<B
     );
 

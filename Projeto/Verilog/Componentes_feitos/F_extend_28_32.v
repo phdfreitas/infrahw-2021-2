@@ -5,6 +5,6 @@ module F_extend_28_32(
     output wire [31:0] extend_28_32_out
 );
 
-    assign extend_28_32_out = {PC[31:28], extend_26_28}
+    assign extend_28_32_out = {PC[31:28], extend_26_28};
 
 endmodule
