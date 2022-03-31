@@ -1,6 +1,7 @@
 module F_mux_ulaB (
     input  wire    [2:0]   selector,
     input  wire    [31:0]  Data_0,
+    input  wire    [31:0]  Data_1,
     input  wire    [31:0]  Data_2,
     input  wire    [31:0]  Data_3,
     input  wire    [31:0]  Data_4,
@@ -12,7 +13,7 @@ module F_mux_ulaB (
     wire [31:0] OIX;
     wire [31:0] OOX;
 
-    assign OOX      = (selector[0]) ? Data_0 : 32'b00000000000000000000000000000100;
+    assign OOX      = (selector[0]) ? Data_0 : Data_1;
     assign OIX      = (selector[0]) ? Data_2 : Data_3;
     assign OXX      = (selector[1]) ? OIX : OOX;
     assign Data_out = (selector[2]) ? IOX : OXX;

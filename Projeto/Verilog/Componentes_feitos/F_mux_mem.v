@@ -1,9 +1,9 @@
 module F_mux_mem (
     input  wire  [2:0]    selector,    //IorD
     input  wire  [31:0]   Data_0,
-	input  wire  [31:0]   Data_1,		//227
-	input  wire  [31:0]   Data_2,		//254
-	input  wire  [31:0]   Data_3,		//255
+	input  wire  [31:0]   Data_1,		//253 (OPCODE INEXISTENTE)
+	input  wire  [31:0]   Data_2,		//254 (OVERFLOW)
+	input  wire  [31:0]   Data_3,		//255 (DIVPORZERO)
     input  wire  [31:0]   Data_4,
     input  wire  [31:0]   Data_5,
     input  wire  [31:0]   Data_6,

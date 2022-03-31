@@ -3,7 +3,7 @@ module F_cpu (
     input wire reset
 );
 
-//Sinais da unidade de controle
+// =-=-=-=-= Sinais da unidade de controle Start =-=-=-=-=
     wire PC_write;
     wire MEMRead;     // 0 = LER || 1 = ESCREVER
     wire IRWrite;
@@ -18,17 +18,20 @@ module F_cpu (
     wire [2:0] ALU_control;
     wire [2:0] IorD;
     wire [1:0] RegDst;
-    wire [2:0] MenToReg;
+    wire [2:0] MemToReg;
     wire [1:0] ALUSourceA;
     wire [2:0] ALUSourceB;
     wire [2:0] PCSource;
     wire [1:0] store_control_sign;
-    wire [1:0] load_size_control
+    wire [1:0] load_size_control;
 
+    wire [1:0] shamt_control;
+    wire [1:0] shiftSource_control;
+    
     wire Overflow;
+// =-=-=-=-= Sinais da unidade de controle End =-=-=-=-=
 
-//Data wires
-
+// =-=-=-=-= Data wires Start =-=-=-=-=
     wire [31:0] PC_out;
     wire [31:0] MEM_out;
     wire [31:0] RegA_out;
@@ -52,23 +55,36 @@ module F_cpu (
     wire [4:0] RT;
     wire [15:0] OFFSET;
 
+    wire [31:0] OPCODE_INEXISTENTE;
+    wire [31:0] OVERFLOW_EXP;
+    wire [31:0] DIV_ZERO_EXP;
+
+    wire [31:0] STACK_START;
+    wire [31:0] HI_out;
+    wire [31:0] LO_out;
+
+    wire [31:0] PC_PLUS_FOUR;
+
+    wire [27:0] extend_26_28_out;
+    wire [31:0] extend_28_32_out;
+
     wire [31:0] ALU_result;
 	wire Negativo;
     wire zero;
     wire LT;
     wire GT;
     wire Igual;
+// =-=-=-=-= Data wires End =-=-=-=-=
 
 
-
-//mux _out
-
+// =-=-=-=-= mux _out start =-=-=-=-=
     wire [31:0] mux_IorD_out;
     wire [31:0] mux_PCSource_out;
     wire [31:0] mux_regDst_out;   //talvez n seja 32 bits, vai depender do que o "registers" recebe como regDst
     wire [31:0] mux_MemToReg_out;
     wire [31:0] mux_aluA_out;
     wire [31:0] mux_aluB_out;
+// =-=-=-=-= mux _out end =-=-=-=-=
 
     Registrador PC_ (
         clk,
@@ -76,17 +92,18 @@ module F_cpu (
         PC_write,
         mux_PCSource_out,
         PC_out
-
     );
 
-    mux_mem M_MEM_ (
+    F_mux_mem M_MEM_ (
         IorD,
         PC_out,
+        OPCODE_INEXISTENTE,
+        OVERFLOW_EXP,
+        DIV_ZERO_EXP,
         RegA_out,
         RegB_out,
         ALUOut_out,
         mux_IorD_out
-
     );
 
     Memoria MEM_ (
@@ -97,7 +114,7 @@ module F_cpu (
         MEM_out
     );
 
-    store_control SC_ (
+    F_store_control SC_ (
         RegB_out,        // Menos significativos
         MDR_out,
         store_control_sign,
@@ -115,12 +132,12 @@ module F_cpu (
         OFFSET
     );
 
-    sign_extend_16_32 SE16_32_ (
+    F_sign_extend_16_32 SE16_32_ (
         OFFSET,
         SE16_32_out
     );
 
-    sign_extend_1_32 SE1_32_ (
+    F_sign_extend_1_32 SE1_32_ (
         LT,
         SE1_32_out
     );
@@ -137,31 +154,32 @@ module F_cpu (
     Registrador MDR_ (
         clk,
         reset,
-        MDR_load, // sinal da unidade de controle para MDR (no diagrama que fizemos nao botamos esse sinal)
+        MDR_load,
         MEM_out,
         MDR_out
     );
 
-    load_size LS_ (
+    F_load_size LS_ (
         load_size_control,
-        MEM_out,
+        MDR_out,
         LS_out
     );
 
-    mux_regDst M_DST_ (
-        RegDst,
-        RT,
+    /*mux_regDst M_DST_ ( // Precisa adicionar um "F_" antes do nome
+        RegDst,           // o módulo desse mux tá sem padrão algum
+        RT,               // não corrigi pq não entendi direito. 
         OFFSET, 
         mux_regDst_out
-    );
+    );*/
 
-    mux_regData M_RDATA_ (
-        MenToReg,
+    F_mux_regData M_RDATA_ (
+        MemToReg,
         ALUOut_out,
-        //HI_out,
-        //Shift_Reg_out,
+        HI_out,
+        Shift_Reg_out,
+        STACK_START,
         SE1_32_out,
-        //LO_out,
+        LO_out,
         LS_out,
         mux_MemToReg_out
     );
@@ -194,21 +212,22 @@ module F_cpu (
         RegB_out
     );
 
-    mux_ulaA M_A_ (
+    F_mux_ulaA M_A_ (
         ALUSourceA,
         PC_out,
         RegA_out,
-        MDR_out,     // o diagrama ta tao confuso que n tenho ctza se a entrada 2 vem do MDR ou nao
+        MDR_out,
         mux_aluA_out 
     );
 
-    mux_ulaB M_B_ (
+    F_mux_ulaB M_B_ (
         ALUSourceB,
         RegB_out,
+        PC_PLUS_FOUR,
         MEM_out,
         SE16_32_out,
         SL2_out,
-        MDR_out,     // o diagrama ta tao confuso que n tenho ctza se a entrada 2 vem do MDR ou nao 
+        MDR_out,  
         mux_aluB_out 
     );
 
@@ -223,14 +242,6 @@ module F_cpu (
 		Igual	//NAO USAMOS		  -- Sinaliza se A=B
 		GT							//-- Sinaliza se A>B
 		LT							//-- Sinaliza se A<B
-    );
-
-    ALU_control ALUCTRL_(
-        //input  wire    [1:0]   selector,
-        //input  wire    [2:0]   ALU_op,
-        //input  wire    [5:0]   funct,
-        //output wire    [2:0]   data_out
-
     );
 
     Registrador ALUOut_ (
@@ -249,29 +260,45 @@ module F_cpu (
         EPC_out
     );
 
-    mux_pcSource M_PCS_ (
+    F_extend_26_28 EX_26_to_28_ (
+        RS, 
+        RT,
+        OFFSET,
+
+        extend_26_28_out
+    );
+
+    F_extend_28_32 EX_28_to_32_ (
+        PC_out, 
+        extend_26_28_out,
+
+        extend_28_32_out
+    );
+
+    F_mux_pcSource M_PCS_ (
         PCSource,
         ALU_result,
         ALUOut_out,
         EPC_out,
-        Data_3,     //mudar o nome   *** entrada da concatenacao de PC com os bits de JUMP, tem que ver como funciona isso ***
-        LS_out,    ------ precisa fazer o LOADSIZE ainda
+        extend_28_32_out,
+        LS_out,    
         RegA_out, 
+
         mux_PCSource_out 
 
     );
 
-    not ZNOT_ (
+    F_not ZNOT_ (
         zero,
         zero_not_out
     );
 
-    not GTNOT_ (
+    F_not GTNOT_ (
         GT,
         GT_not_out
     );
 
-    mux_aluLogic M_BRANCH_ (
+    F_mux_aluLogic M_BRANCH_ (
         ALULogic,
         zero,
         zero_not_out,
@@ -280,23 +307,17 @@ module F_cpu (
         mux_branch_out
     );
 
+    /* Amanhã vou fazer o shamtControl, o shiftSource e o ShiftReg
 
-    // DIV E SHAMT
-
-    /*mux_shamtControl M_SC_ (
-        nput  wire     [1:0]   selector,
-        input  wire    [10:0]  Data_0,    --shamt[10:6]
-        input  wire    [31:0]  Data_2,    
-        input  wire    [31:0]  Data_3,    --B
-        output wire    [31:0]  Data_out 
-
-    );*/
-
-    Registrador SHIFT_REG_ ( // É Registrador? mas tem 2 entradas entao deu ruim pq n é igual ao registrador fornecido
-
-
+    F_mux_shamtControl M_ShamtC_ (
+        
     );
 
+    F_mux_shiftSourceControl M_ShiftC_ (
+        
+    );
 
+    RegDesloc SHIFT_REG_ ( // É Registrador? mas tem 2 entradas entao deu ruim pq n é igual ao registrador fornecido
 
+    );*/
 endmodule
