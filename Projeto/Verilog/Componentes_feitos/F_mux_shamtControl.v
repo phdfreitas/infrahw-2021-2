@@ -1,6 +1,6 @@
 module F_mux_shamtControl (
     input  wire    [1:0]   selector,
-    input  wire    [5:0]  Data_0,
+    input  wire    [4:0]   Data_0,
     input  wire    [31:0]  Data_1,
     input  wire    [31:0]  Data_2,    
     input  wire    [31:0]  Data_3,
