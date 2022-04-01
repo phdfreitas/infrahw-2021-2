@@ -9,13 +9,16 @@ module F_mux_pcSource (
     output wire    [31:0]  Data_out 
 );
 
-    wire [31:0] OXX;
-    wire [31:0] OIX;
-    wire [31:0] OOX;
+    wire [31:0] W1;
+    wire [31:0] W2;
+    wire [31:0] W3;
+    wire [31:0] W4;
 
-    assign OOX      = (selector[0]) ? Data_0 : Data_1;
-    assign OIX      = (selector[0]) ? Data_2 : Data_3;
-    assign OXX      = (selector[1]) ? OIX : OOX;
-    assign Data_out = (selector[2]) ? IOX : OXX;
+    assign W1       = (selector[0]) ? Data_0 : Data_1; 
+    assign W2       = (selector[0]) ? Data_3 : Data_3;
+    assign W3       = (selector[0]) ? Data_5 : Data_4;
+    assign W4       = (selector[1]) ? W2 : W1;
+
+    assign Data_out = (selector[2]) ? W3 : W4;
     
 endmodule

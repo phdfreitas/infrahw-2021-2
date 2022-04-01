@@ -14,6 +14,8 @@ module F_cpu (
     wire AluOutWrite;
     wire EPCWrite;
     wire ALULogic;
+
+    wire [2:0] AluOp;
     
     wire [2:0] ALU_control;
     wire [2:0] IorD;
@@ -311,7 +313,13 @@ module F_cpu (
     F_ctrl_unit CONTROL_ (
         clk,
         reset,
-        Overflow,
+        
+        Overflow, 				    //-- Sinaliza overflow aritm�tico
+		Negativo,  //NAO USAMOS	    //-- Sinaliza valor negativo
+		zero, 						//-- Sinaliza quando S for zero
+		Igual,	//NAO USAMOS		  -- Sinaliza se A=B
+		GT,							//-- Sinaliza se A>B
+		LT,							//-- Sinaliza se A<B
 
         OPCODE,
         FUNCT,
@@ -332,6 +340,9 @@ module F_cpu (
         ALUSourceA,
         ALUSourceB,
         PCSource,
+
+        AluOp,
+        AluOutWrite,
 
         reset
     );
