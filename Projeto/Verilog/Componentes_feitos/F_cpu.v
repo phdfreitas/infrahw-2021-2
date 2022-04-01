@@ -43,7 +43,7 @@ module F_cpu (
     wire [31:0] LS_out;
     wire [31:0] REGS_out1;
     wire [31:0] REGS_out2;
-    wire [31:0] SL2_out;
+    wire [31:0] SL2_out     = 32'd0;
     wire [31:0] SE16_32_out;
     wire [31:0] SE1_32_out;
     wire [31:0] EPC_out;
@@ -66,7 +66,7 @@ module F_cpu (
     wire [31:0] OVERFLOW_EXP;
     wire [31:0] DIV_ZERO_EXP;
 
-    wire [31:0] STACK_START;
+    wire [31:0] STACK_START = 32'd227;
     wire [31:0] HI_out;
     wire [31:0] LO_out;
 
@@ -82,6 +82,8 @@ module F_cpu (
     wire GT;
     wire Igual;
 
+    wire [31:0] Shift_Reg_out = 32'd0; // Possível erro
+
     wire reset_out;
 // =-=-=-=-= Data wires End =-=-=-=-=
 
@@ -89,7 +91,7 @@ module F_cpu (
 // =-=-=-=-= mux _out start =-=-=-=-=
     wire [31:0] mux_IorD_out;
     wire [31:0] mux_PCSource_out;
-    wire [31:0] mux_regDst_out;   //talvez n seja 32 bits, vai depender do que o "registers" recebe como regDst
+    wire [4:0]  mux_regDst_out;   //talvez n seja 32 bits, vai depender do que o "registers" recebe como regDst
     wire [31:0] mux_MemToReg_out;
     wire [31:0] mux_aluA_out;
     wire [31:0] mux_aluB_out;
@@ -151,14 +153,14 @@ module F_cpu (
         SE1_32_out
     );
 
-    RegDesloc shift_left2_offset (
+    /*RegDesloc shift_left2_offset (
         clk,
 		reset,
 		3'b010,
 		5'b00010,
 		SE16_32_out,
 		SL2_out
-    );
+    );*/
 
     Registrador MDR_ (
         clk,
@@ -243,16 +245,16 @@ module F_cpu (
     );
 
     ula32 ALU_ (
-        mux_aluA_out, 				//-- Operando A da ULA
-		mux_aluB_out, 				//-- Operando B da ULA
-		ALU_control, 		        //-- Seletor da opera��o da ULA
-		ALU_result, 				    //-- Resultado da opera��o (SOMA, SUB, AND, NOT, INCREMENTO, XOR)  
-		Overflow, 				    //-- Sinaliza overflow aritm�tico
-		Negativo,  //NAO USAMOS	    //-- Sinaliza valor negativo
-		zero, 						//-- Sinaliza quando S for zero
-		Igual,	//NAO USAMOS		  -- Sinaliza se A=B
-		GT,							//-- Sinaliza se A>B
-		LT							//-- Sinaliza se A<B
+        mux_aluA_out, 				
+		mux_aluB_out, 				
+		AluOp, 		        
+		ALU_result, 				  
+		Overflow, 				    
+		Negativo,  //NAO USAMOS	    
+		zero, 						
+		Igual,	//NAO USAMOS		
+		GT,							
+		LT
     );
 
     Registrador ALUOut_ (
@@ -299,7 +301,7 @@ module F_cpu (
 
     );
 
-    F_not ZNOT_ (
+    /*F_not ZNOT_ (
         zero,
         zero_not_out
     );
@@ -316,7 +318,7 @@ module F_cpu (
         GT,
         GT_not_out,
         mux_branch_out
-    );
+    );*/
 
     F_ctrl_unit CONTROL_ (
         clk,
