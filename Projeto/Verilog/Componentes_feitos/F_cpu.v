@@ -77,6 +77,8 @@ module F_cpu (
     wire LT;
     wire GT;
     wire Igual;
+
+    wire reset_out;
 // =-=-=-=-= Data wires End =-=-=-=-=
 
 
@@ -344,7 +346,7 @@ module F_cpu (
         AluOp,
         AluOutWrite,
 
-        reset
+        reset_out
     );
 
     /* Amanhã vou fazer o shamtControl, o shiftSource e o ShiftReg
