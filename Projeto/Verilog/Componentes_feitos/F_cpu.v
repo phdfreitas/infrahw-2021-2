@@ -54,6 +54,7 @@ module F_cpu (
     wire [4:0] RS;
     wire [4:0] RT;
     wire [15:0] OFFSET;
+    wire [5:0]  FUNCT = OFFSET[5:0];
 
     wire [31:0] OPCODE_INEXISTENTE;
     wire [31:0] OVERFLOW_EXP;
@@ -307,8 +308,35 @@ module F_cpu (
         mux_branch_out
     );
 
-    /* Amanhã vou fazer o shamtControl, o shiftSource e o ShiftReg
+    F_ctrl_unit CONTROL_ (
+        clk,
+        reset,
+        Overflow,
 
+        OPCODE,
+        FUNCT,
+    // =-=-=-=-=-=-=-=-=-=-=-= //
+
+    // Sinais de controle unitários //
+        PC_write,
+        MEMRead,
+        IRWrite,
+        RegWrite,
+        A_load, // Depois mudar o nome pra A_write e embaixo pra B_write
+        B_load,
+
+    // Controladores dos mux (da esquerda para a direita)
+        IorD,
+        RegDst,
+        MemToReg,
+        ALUSourceA,
+        ALUSourceB,
+        PCSource,
+
+        reset
+    );
+
+    /* Amanhã vou fazer o shamtControl, o shiftSource e o ShiftReg
     F_mux_shamtControl M_ShamtC_ (
         
     );
