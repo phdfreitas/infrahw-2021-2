@@ -58,6 +58,10 @@ module F_cpu (
     wire [15:0] OFFSET;
     wire [5:0]  FUNCT = OFFSET[5:0];
 
+    wire [4:0] TW_NINE      = 5'd29;
+    wire [4:0] TH_ONE       = 5'd31;
+    wire [4:0] INST15_11    = OFFSET[4:0];
+
     wire [31:0] OPCODE_INEXISTENTE;
     wire [31:0] OVERFLOW_EXP;
     wire [31:0] DIV_ZERO_EXP;
@@ -148,8 +152,8 @@ module F_cpu (
     );
 
     RegDesloc shift_left2_offset (
-        Clk,
-		Reset,
+        clk,
+		reset,
 		3'b010,
 		5'b00010,
 		SE16_32_out,
@@ -170,12 +174,14 @@ module F_cpu (
         LS_out
     );
 
-    /*mux_regDst M_DST_ ( // Precisa adicionar um "F_" antes do nome
-        RegDst,           // o módulo desse mux tá sem padrão algum
-        RT,               // não corrigi pq não entendi direito. 
-        OFFSET, 
+    F_mux_regDst M_DST_ ( 
+        RegDst,           
+        RT,
+        TW_NINE,
+        TH_ONE,                
+        INST15_11, 
         mux_regDst_out
-    );*/
+    );
 
     F_mux_regData M_RDATA_ (
         MemToReg,
@@ -190,8 +196,8 @@ module F_cpu (
     );
 
     Banco_reg REGS_ (
-        Clk,
-		Reset,
+        clk,
+		reset,
 		RegWrite,
 		RS,
 		RT,
@@ -316,18 +322,16 @@ module F_cpu (
         clk,
         reset,
         
-        Overflow, 				    //-- Sinaliza overflow aritm�tico
-		Negativo,  //NAO USAMOS	    //-- Sinaliza valor negativo
-		zero, 						//-- Sinaliza quando S for zero
-		Igual,	//NAO USAMOS		  -- Sinaliza se A=B
-		GT,							//-- Sinaliza se A>B
-		LT,							//-- Sinaliza se A<B
+        Overflow, 				 
+		Negativo,  //NAO USAMOS	    
+		zero, 						
+		Igual,	//NAO USAMOS		
+		GT,							
+		LT,
 
         OPCODE,
         FUNCT,
-    // =-=-=-=-=-=-=-=-=-=-=-= //
-
-    // Sinais de controle unitários //
+    
         PC_write,
         MEMRead,
         IRWrite,
@@ -335,7 +339,6 @@ module F_cpu (
         A_load, // Depois mudar o nome pra A_write e embaixo pra B_write
         B_load,
 
-    // Controladores dos mux (da esquerda para a direita)
         IorD,
         RegDst,
         MemToReg,
@@ -348,17 +351,4 @@ module F_cpu (
 
         reset_out
     );
-
-    /* Amanhã vou fazer o shamtControl, o shiftSource e o ShiftReg
-    F_mux_shamtControl M_ShamtC_ (
-        
-    );
-
-    F_mux_shiftSourceControl M_ShiftC_ (
-        
-    );
-
-    RegDesloc SHIFT_REG_ ( // É Registrador? mas tem 2 entradas entao deu ruim pq n é igual ao registrador fornecido
-
-    );*/
 endmodule
