@@ -3,35 +3,40 @@ module F_cpu (
     input wire reset
 );
 
-// =-=-=-=-= Sinais da unidade de controle Start =-=-=-=-=
+// =-=-=-=-= Sinais da unidade de controle =-=-=-=-=
+    // =-=-=-=-= UNITÁRIOS =-=-=-=-= 
     wire PC_write;
     wire PC_write_cond;
-    wire MEMRead;     // 0 = LER || 1 = ESCREVER
+    wire MEMRead;
     wire IRWrite;
-    wire MDR_load;
+    wire MDRWrite;
     wire RegWrite;
-    wire B_load;
-    wire A_load;
+    wire A_Write; 
+    wire B_Write; 
     wire AluOutWrite;
     wire EPCWrite;
     wire ALULogic;
+    wire shiftSource_control;
 
-    wire [2:0] AluOp;
-    
-    wire [2:0] ALU_control;
-    wire [2:0] IorD;
+    // =-=-=-= EXCEPTIONS =-=-=-= // 
+    wire Overflow;
+
+    // =-=-=-=-= DOIS DÍGITOS =-=-=-=-=
     wire [1:0] RegDst;
-    wire [2:0] MemToReg;
     wire [1:0] ALUSourceA;
-    wire [2:0] ALUSourceB;
-    wire [2:0] PCSource;
     wire [1:0] store_control_sign;
     wire [1:0] load_size_control;
-
     wire [1:0] shamt_control;
-    wire shiftSource_control;
+
+    // =-=-=-=-= TRÊS DÍGITOS =-=-=-=-=
+    wire [2:0] IorD;
+    wire [2:0] MemToReg;
+    wire [2:0] AluOp;
+    wire [2:0] ALU_control;
+    wire [2:0] ALUSourceB;
+    wire [2:0] ShiftControl;
+    wire [2:0] PCSource;
     
-    wire Overflow;
 // =-=-=-=-= Sinais da unidade de controle End =-=-=-=-=
 
 // =-=-=-=-= Data wires Start =-=-=-=-=
@@ -49,33 +54,48 @@ module F_cpu (
     wire [31:0] SE1_32_out;
     wire [31:0] EPC_out;
     wire [31:0] SC_out;
-    wire mux_branch_out;
-    wire zero_not_out;
-    wire GT_not_out;
+    wire [31:0] Shift_Reg_out;
+    wire [31:0] shiftSource_out;
+    wire [31:0] HI_out      = 32'd0;
+    wire [31:0] LO_out      = 32'd0;
+    wire [31:0] mux_IorD_out;
+    wire [31:0] mux_PCSource_out;
+    wire [31:0] mux_MemToReg_out;
+    wire [31:0] mux_aluA_out;
+    wire [31:0] mux_aluB_out;
+    wire [4:0]  mux_regDst_out;
 
-    wire [5:0] OPCODE;
-    wire [4:0] RS;
-    wire [4:0] RT;
-    wire [15:0] OFFSET;
-    wire [5:0]  FUNCT = OFFSET[5:0];
+    // INSTRUCTIONS
+    wire [15:0]     OFFSET;
+    wire [5:0]      FUNCT       = OFFSET[5:0];
+    wire [5:0]      OPCODE;
+    wire [4:0]      RS;
+    wire [4:0]      RT;
+    wire [4:0]      RD          = OFFSET[15:11];
 
-    wire [4:0] TW_NINE      = 5'd29;
-    wire [4:0] TH_ONE       = 5'd31;
-    wire [4:0] INST15_11    = OFFSET[4:0];
+    // SHAMT CONTROL
+    wire [4:0]  SHAMT           = OFFSET[10:6];
+    wire [4:0]  Shamt_Memory    = MDR_out[4:0];
+    wire [4:0]  Shamt_B         = RegB_out[4:0];
+    wire [4:0]  Shamt_Out;       
 
-    wire [31:0] OPCODE_INEXISTENTE;
-    wire [31:0] OVERFLOW_EXP;
-    wire [31:0] DIV_ZERO_EXP;
-
-    wire [31:0] STACK_START = 32'd227;
-    wire [31:0] HI_out = 32'd0;
-    wire [31:0] LO_out = 32'd0;
-
-    wire [31:0] PC_PLUS_FOUR = 32'd4;
-
+    // STACK STUFF
+    wire [4:0] TW_NINE          = 5'd29;
+    wire [4:0] TH_ONE           = 5'd31;
+    
+    // EXCEPTIONS AND CONSTANTS
+    wire [31:0] OPCODE_INEXISTENTE  = 32'd253;
+    wire [31:0] OVERFLOW_EXP        = 32'd254;
+    wire [31:0] DIV_ZERO_EXP        = 32'd255;
+    wire [31:0] STACK_START         = 32'd227;
+    wire [31:0] Data1_Four          = 32'd4;   // ALUSourceB Mux Data_1
+    wire [4:0]  Data1_Sixteen       = 5'd16;   // ShamtControl Mux Data_1
+    
+    // JUMP INSTRUCTION
     wire [27:0] extend_26_28_out;
     wire [31:0] extend_28_32_out;
 
+    // ALU RESULT AND FLAGS
     wire [31:0] ALU_result;
 	wire Negativo;
     wire zero;
@@ -83,20 +103,10 @@ module F_cpu (
     wire GT;
     wire Igual;
 
-    wire [31:0] Shift_Reg_out = 32'd0; // Possível erro
-
-    wire reset_out;
+    wire mux_branch_out;
+    wire zero_not_out;
+    wire GT_not_out;
 // =-=-=-=-= Data wires End =-=-=-=-=
-
-
-// =-=-=-=-= mux _out start =-=-=-=-=
-    wire [31:0] mux_IorD_out;
-    wire [31:0] mux_PCSource_out;
-    wire [4:0]  mux_regDst_out;   //talvez n seja 32 bits, vai depender do que o "registers" recebe como regDst
-    wire [31:0] mux_MemToReg_out;
-    wire [31:0] mux_aluA_out;
-    wire [31:0] mux_aluB_out;
-// =-=-=-=-= mux _out end =-=-=-=-=
 
     Registrador PC_ (
         clk,
@@ -127,7 +137,7 @@ module F_cpu (
     );
 
     F_store_control SC_ (
-        RegB_out,        // Menos significativos
+        RegB_out,
         MDR_out,
         store_control_sign,
         SC_out
@@ -166,15 +176,40 @@ module F_cpu (
     Registrador MDR_ (
         clk,
         reset,
-        MDR_load,   // esse sinal é da unidade de controle, mas não ta inserido na unidade de controle (linha 323)
+        MDRWrite,
         MEM_out,
         MDR_out
     );
 
     F_load_size LS_ (
-        load_size_control,   // tambem é sinal da un de ctrl que não foi inserido
+        load_size_control,
         MDR_out,
         LS_out
+    );
+
+    F_mux_shiftSource shiftSource_ (
+        shiftSource_control,
+        RegA_out,
+        RegB_out,
+        shiftSource_out
+    );
+
+    F_mux_shamtControl shamtSource_ (
+        shamt_control,
+        SHAMT,
+        Data1_Sixteen,
+        Shamt_Memory,
+        Shamt_B,
+        Shamt_Out
+    );
+
+    RegDesloc Shift_Reg_ (
+        clk,
+        reset,
+        ShiftControl,
+        Shamt_Out,		
+        shiftSource_out,
+        Shift_Reg_out
     );
 
     F_mux_regDst M_DST_ ( 
@@ -182,7 +217,7 @@ module F_cpu (
         RT,
         TW_NINE,
         TH_ONE,                
-        INST15_11, 
+        RD, 
         mux_regDst_out
     );
 
@@ -213,7 +248,7 @@ module F_cpu (
     Registrador A_ (
         clk,
         reset,
-        A_load,      // sinal da unidade de controle para A (no diagrama que fizemos nao botamos esse sinal)
+        A_Write,
         REGS_out1,
         RegA_out
     );
@@ -221,7 +256,7 @@ module F_cpu (
     Registrador B_ (
         clk,
         reset,
-        B_load,      // sinal da unidade de controle para B (no diagrama que fizemos nao botamos esse sinal)
+        B_Write,
         REGS_out2,
         RegB_out
     );
@@ -237,7 +272,7 @@ module F_cpu (
     F_mux_ulaB M_B_ (
         ALUSourceB,
         RegB_out,
-        PC_PLUS_FOUR, // esse fio deveria ser 4, porém ele não é iniciado com 4 nem aqui e nem no (F_mux_ulaB) que ele está como Data_1.
+        Data1_Four, 
         MEM_out,
         SE16_32_out,
         SL2_out,
@@ -269,7 +304,7 @@ module F_cpu (
     Registrador EPC_ (
         clk,
         reset,
-        EPCWrite,  // Sinal da unidade de controle, mas não ta na uni de ctrl (linha 323)
+        EPCWrite,
         ALUOut_out,
         EPC_out
     );
@@ -341,9 +376,9 @@ module F_cpu (
         MEMRead,
         IRWrite,
         RegWrite,
-        A_load,
-        B_load,
-        MDR_load,
+        A_Write,
+        B_Write,
+        MDRWrite,
         EPCWrite,
         AluOutWrite,
 
