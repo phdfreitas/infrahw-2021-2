@@ -5,6 +5,7 @@ module F_cpu (
 
 // =-=-=-=-= Sinais da unidade de controle Start =-=-=-=-=
     wire PC_write;
+    wire PC_write_cond;
     wire MEMRead;     // 0 = LER || 1 = ESCREVER
     wire IRWrite;
     wire MDR_load;
@@ -28,7 +29,7 @@ module F_cpu (
     wire [1:0] load_size_control;
 
     wire [1:0] shamt_control;
-    wire [1:0] shiftSource_control;
+    wire shiftSource_control;
     
     wire Overflow;
 // =-=-=-=-= Sinais da unidade de controle End =-=-=-=-=
@@ -67,10 +68,10 @@ module F_cpu (
     wire [31:0] DIV_ZERO_EXP;
 
     wire [31:0] STACK_START = 32'd227;
-    wire [31:0] HI_out;
-    wire [31:0] LO_out;
+    wire [31:0] HI_out = 32'd0;
+    wire [31:0] LO_out = 32'd0;
 
-    wire [31:0] PC_PLUS_FOUR;
+    wire [31:0] PC_PLUS_FOUR = 32'd4;
 
     wire [27:0] extend_26_28_out;
     wire [31:0] extend_28_32_out;
@@ -323,34 +324,42 @@ module F_cpu (
     F_ctrl_unit CONTROL_ (
         clk,
         reset,
-        
-        Overflow, 				 
-		Negativo,  //NAO USAMOS	    
-		zero, 						
-		Igual,	//NAO USAMOS		
-		GT,							
-		LT,
-
+    
+        Overflow,
+        Negativo,
+	    zero,
+	    Igual,
+	    GT,
+	    LT,
+    
         OPCODE,
         FUNCT,
     
+    // Sinais de controle unitários //
         PC_write,
+        PC_write_cond,
         MEMRead,
         IRWrite,
         RegWrite,
-        A_load, // Depois mudar o nome pra A_write e embaixo pra B_write
+        A_load,
         B_load,
-
-        IorD,
-        RegDst,
-        MemToReg,
-        ALUSourceA,
-        ALUSourceB,
-        PCSource,
-
-        AluOp,
+        MDR_load,
+        EPCWrite,
         AluOutWrite,
 
-        reset_out
+    // Sinais de controle dois dígitos
+        RegDst,
+        ALUSourceA,
+        store_control_sign,
+        load_size_control,
+        shamt_control,
+        shiftSource_control,
+
+    // Controles de três dígitos
+        IorD,
+        MemToReg,
+        ALUSourceB,
+        AluOp,
+        PCSource
     );
 endmodule

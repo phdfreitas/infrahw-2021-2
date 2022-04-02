@@ -17,163 +17,205 @@ module F_ctrl_unit(
 
     // Sinais de controle unitários //
     output reg PC_write,
+    output reg PC_write_cond,
     output reg MEMRead,
     output reg IRWrite,
     output reg RegWrite,
     output reg A_write,
     output reg B_write,
+    output reg MDR_load,
+    output reg EPCWrite,
+    output reg AluOutWrite,
 
-    // Controladores dos mux (da esquerda para a direita)
-    output reg [2:0] IorD,
+
+    // Sinais de controle dois dígitos
     output reg [1:0] RegDst,
-    output reg [2:0] MemToReg,
     output reg [1:0] ALUSourceA,
+    output reg [1:0] storeControl,
+    output reg [1:0] loadSizeControl,
+    output reg [1:0] shamtControl,
+    output reg       shiftSourceControl, // posicionar no lugar correto depois
+
+    // Controles de três dígitos
+    output reg [2:0] IorD,
+    output reg [2:0] MemToReg,
     output reg [2:0] ALUSourceB,
-    output reg [2:0] PCSource,
-
     output reg [2:0] AluOp,
-    output reg       AluOutWrite,
-
-    output reg reset_out
+    output reg [2:0] PCSource
 );
 
 // Variáveis Internas
-reg [4:0] STATE;
+reg [5:0] STATE;
 
 // Constantes (Se refere a cada estado)
-parameter RESET             = 5'd0;
-parameter INSTRUCTION_FETCH = 5'd1;
-parameter WAIT              = 5'd2;
-parameter DECODE            = 5'd3;
-parameter ADD               = 5'd4;
-parameter AND               = 5'd5;
-parameter SUB               = 5'd6;
-parameter END_R             = 5'd7;
+parameter RESET             = 6'd0;
+parameter INSTRUCTION_FETCH = 6'd1;
+parameter WAIT              = 6'd2;
+parameter WAIT_AUX          = 6'd3;
+parameter DECODE            = 6'd4;
+parameter ADD               = 6'd5;
+parameter SUB               = 6'd6;
+parameter ADDI              = 6'd7;
+parameter END_R             = 6'd8;
+parameter END_IMMEDIATE     = 6'd9;
 
 
 initial begin
-    reset_out = 1'd1;
+    STATE = INSTRUCTION_FETCH;
 end
 
 always @(posedge clk) begin
     if (reset) begin
-        if (STATE != RESET) begin
-            STATE = RESET;
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd1;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
 
-            PC_write    = 1'd0;
-            MEMRead     = 1'd0;
-            IRWrite     = 1'd0;
-            RegWrite    = 1'd0;
-            A_write     = 1'd0;
-            B_write     = 1'd0;
-            IorD        = 3'd0;
-            RegDst      = 2'd0;
-            MemToReg    = 3'd0;
-            ALUSourceA  = 2'd0;
-            ALUSourceB  = 3'd0;
-            PCSource    = 3'd0;
+            RegDst              = 2'd1;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
 
-            AluOp       = 3'd0;
-            AluOutWrite = 1'd0;
+            IorD                = 3'd0;
+            MemToReg            = 3'd3;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd0;
+            PCSource            = 3'd0;
 
-            reset_out   = 1'd1;
-        end
-        else begin
             STATE = INSTRUCTION_FETCH;
-
-            PC_write    = 1'd0;
-            MEMRead     = 1'd0;
-            IRWrite     = 1'd0;
-            RegWrite    = 1'd1;
-            A_write     = 1'd0;
-            B_write     = 1'd0;
-            IorD        = 3'd0;
-            RegDst      = 2'd1;
-            MemToReg    = 3'd3;
-            ALUSourceA  = 2'd0;
-            ALUSourceB  = 3'd0;
-            PCSource    = 3'd0;
-
-            AluOp       = 3'd0;
-            AluOutWrite = 1'd0;
-
-            reset_out   = 1'd0;
-        end
     end
     else begin
         if(STATE == INSTRUCTION_FETCH) begin
+            PC_write            = 1'd1;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd3;
+            ALUSourceB          = 3'd1;
+            AluOp               = 3'd1;
+            PCSource            = 3'd0;
+
             STATE = WAIT;
-
-            PC_write    = 1'd1;
-            MEMRead     = 1'd0;
-            IRWrite     = 1'd1;
-            RegWrite    = 1'd0;
-            A_write     = 1'd0;
-            B_write     = 1'd0;
-            IorD        = 3'd0;
-            RegDst      = 2'd1;
-            MemToReg    = 3'd3;
-            ALUSourceA  = 2'd0;
-            ALUSourceB  = 3'd1;
-            PCSource    = 3'd0;
-
-            AluOp       = 3'd1;
-            AluOutWrite = 1'd0;
-
-            reset_out   = 1'd0;
         end
     
         else if(STATE == WAIT) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd3;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd0;
+            PCSource            = 3'd0;
+
+            STATE = WAIT_AUX;
+        end
+
+        else if(STATE == WAIT_AUX) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd1;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd3;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd0;
+            PCSource            = 3'd0;
+
             STATE = DECODE;
-
-            PC_write    = 1'd0;
-            MEMRead     = 1'd0;
-            IRWrite     = 1'd1;
-            RegWrite    = 1'd0;
-            A_write     = 1'd0;
-            B_write     = 1'd0;
-            IorD        = 3'd0;
-            RegDst      = 2'd1;
-            MemToReg    = 3'd3;
-            ALUSourceA  = 2'd0;
-            ALUSourceB  = 3'd1;
-            PCSource    = 3'd0;
-
-            AluOp       = 3'd1;
-            AluOutWrite = 1'd0;
-
-            reset_out   = 1'd0;
         end
 
         else if(STATE == DECODE) begin
-            PC_write    = 1'd0;
-            MEMRead     = 1'd0;
-            IRWrite     = 1'd0;
-            RegWrite    = 1'd0;
-            A_write     = 1'd1;
-            B_write     = 1'd1;
-            IorD        = 3'd0;
-            RegDst      = 2'd0;
-            MemToReg    = 3'd3;
-            ALUSourceA  = 2'd0;
-            ALUSourceB  = 3'd4;
-            PCSource    = 3'd0;
-            
-            AluOp       = 3'd1;
-            AluOutWrite = 1'd1;
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd1;
+            B_write             = 1'd1;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd1;
 
-            reset_out   = 1'd0;
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd3;
+            ALUSourceB          = 3'd4;
+            AluOp               = 3'd1;
+            PCSource            = 3'd0;
 
             case (opcode)    
-                8'h0: begin         // Se o OPCODE = 0x0, então é uma operação do tipo R
+                6'h0: begin         // Se o OPCODE = 0x0, então é uma operação do tipo R
                     case (funct)    // Logo, o que vai diferir, é o campo funct
-                        8'h20: begin
+                        6'h20: begin
                             STATE = ADD;
                         end
-                        8'h24: begin
-                            STATE = AND;
+                        6'h22: begin
+                            STATE = SUB;
                         end
                     endcase
+                end
+
+                6'h8: begin
+                    STATE = ADDI;
                 end
 
                 // Fazer opCodes do tipo I
@@ -182,71 +224,116 @@ always @(posedge clk) begin
         end
 
         else if(STATE == ADD) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd1;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd1;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd1;
+            PCSource            = 3'd0;
+
             STATE = END_R;
-
-            PC_write    = 1'd0;
-            MEMRead     = 1'd0;
-            IRWrite     = 1'd0;
-            RegWrite    = 1'd0;
-            A_write     = 1'd1;
-            B_write     = 1'd1;
-            IorD        = 3'd0;
-            RegDst      = 2'd0;
-            MemToReg    = 3'd3;
-            ALUSourceA  = 2'd1;
-            ALUSourceB  = 3'd0;
-            PCSource    = 3'd0;
-            AluOp       = 3'd1;
-            AluOutWrite = 1'd1;
-
-            reset_out   = 1'd0;
         end
 
         else if(STATE == END_R) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd1;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd3;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd0;
+            PCSource            = 3'd0;
+
             STATE = INSTRUCTION_FETCH;
-
-            PC_write    = 1'd0;
-            MEMRead     = 1'd0;
-            IRWrite     = 1'd0;
-            RegWrite    = 1'd1;
-            A_write     = 1'd1;
-            B_write     = 1'd1;
-            IorD        = 3'd0;
-            RegDst      = 2'd3;
-            MemToReg    = 3'd0;
-            ALUSourceA  = 2'd1;
-            ALUSourceB  = 3'd0;
-            PCSource    = 3'd0;
-            
-            AluOp       = 3'd1;
-            AluOutWrite = 1'd1;
-
-            reset_out   = 1'd0;
         end
 
-        else if(STATE == RESET) begin
-            STATE = RESET;
+        else if(STATE == ADDI) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd1;
 
-            PC_write    = 1'd0;
-            MEMRead     = 1'd0;
-            IRWrite     = 1'd0;
-            RegWrite    = 1'd0;
-            A_write     = 1'd0;
-            B_write     = 1'd0;
-            IorD        = 3'd0;
-            RegDst      = 2'd0;
-            MemToReg    = 3'd0;
-            ALUSourceA  = 2'd0;
-            ALUSourceB  = 3'd0;
-            PCSource    = 3'd0;
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd1;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
 
-            AluOp       = 3'd0;
-            AluOutWrite = 1'd0;
+            IorD                = 3'd0;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd3;
+            AluOp               = 3'd1;
+            PCSource            = 3'd0;
 
-            reset_out   = 1'd1;
+            STATE = END_IMMEDIATE;
         end
 
+        else if(STATE == END_IMMEDIATE) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd1;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd0;
+            PCSource            = 3'd0;
+
+            STATE = INSTRUCTION_FETCH;
+        end
     end
 end
-
 endmodule
