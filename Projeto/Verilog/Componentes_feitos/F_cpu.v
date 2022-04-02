@@ -165,13 +165,13 @@ module F_cpu (
     Registrador MDR_ (
         clk,
         reset,
-        MDR_load,
+        MDR_load,   // esse sinal é da unidade de controle, mas não ta inserido na unidade de controle (linha 323)
         MEM_out,
         MDR_out
     );
 
     F_load_size LS_ (
-        load_size_control,
+        load_size_control,   // tambem é sinal da un de ctrl que não foi inserido
         MDR_out,
         LS_out
     );
@@ -188,11 +188,11 @@ module F_cpu (
     F_mux_regData M_RDATA_ (
         MemToReg,
         ALUOut_out,
-        HI_out,
-        Shift_Reg_out,
+        HI_out,      // esse fio não existe (sai do HI, mas o HI ainda nao foi feito) atribuir um valor pra ele deve resolver.
+        Shift_Reg_out,  // aqui tu atribuiu um valor, acho q é safe.
         STACK_START,
         SE1_32_out,
-        LO_out,
+        LO_out,      // fio não existe / nao foi atribuido valor
         LS_out,
         mux_MemToReg_out
     );
@@ -236,7 +236,7 @@ module F_cpu (
     F_mux_ulaB M_B_ (
         ALUSourceB,
         RegB_out,
-        PC_PLUS_FOUR,
+        PC_PLUS_FOUR, // esse fio deveria ser 4, porém ele não é iniciado com 4 nem aqui e nem no (F_mux_ulaB) que ele está como Data_1.
         MEM_out,
         SE16_32_out,
         SL2_out,
@@ -268,7 +268,7 @@ module F_cpu (
     Registrador EPC_ (
         clk,
         reset,
-        EPCWrite,
+        EPCWrite,  // Sinal da unidade de controle, mas não ta na uni de ctrl (linha 323)
         ALUOut_out,
         EPC_out
     );
