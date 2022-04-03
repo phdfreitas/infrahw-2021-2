@@ -224,11 +224,11 @@ module F_cpu (
     F_mux_regData M_RDATA_ (
         MemToReg,
         ALUOut_out,
-        HI_out,      // esse fio não existe (sai do HI, mas o HI ainda nao foi feito) atribuir um valor pra ele deve resolver.
-        Shift_Reg_out,  // aqui tu atribuiu um valor, acho q é safe.
+        HI_out,
+        Shift_Reg_out,
         STACK_START,
         SE1_32_out,
-        LO_out,      // fio não existe / nao foi atribuido valor
+        LO_out,
         LS_out,
         mux_MemToReg_out
     );
@@ -345,6 +345,18 @@ module F_cpu (
     F_not GTNOT_ (
         GT,
         GT_not_out
+    );
+
+    F_andgate AND_ (
+        mux_branch_out,
+        PC_write_cond,
+        branch_signal
+    );
+
+    F_orgate OR_ (
+       branch_signal,  // saida do and
+       PC_writeUC,     // sinal da un de controle
+       PC_write        // pc_write real (nao o da un de controle)
     );
 
     F_mux_aluLogic M_BRANCH_ (
