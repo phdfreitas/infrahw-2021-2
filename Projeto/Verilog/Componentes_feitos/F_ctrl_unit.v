@@ -58,6 +58,7 @@ parameter SUB               = 6'd6;
 parameter ADDI              = 6'd7;
 parameter END_R             = 6'd8;
 parameter END_IMMEDIATE     = 6'd9;
+parameter AND               = 6'd10; 
 
 
 initial begin
@@ -211,6 +212,9 @@ always @(posedge clk) begin
                         6'h22: begin
                             STATE = SUB;
                         end
+                        6'h24: begin
+                            STATE = AND;
+                        end
                     endcase
                 end
 
@@ -333,6 +337,62 @@ always @(posedge clk) begin
             PCSource            = 3'd0;
 
             STATE = INSTRUCTION_FETCH;
+        end
+
+        else if(STATE == SUB) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd1;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd1;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd2;
+            PCSource            = 3'd0;
+
+            STATE = END_R;
+        end
+
+        else if(STATE == AND) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd1;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd1;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd3;
+            PCSource            = 3'd0;
+
+            STATE = END_R;
         end
     end
 end
