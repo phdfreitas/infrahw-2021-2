@@ -403,6 +403,7 @@ module F_cpu (
         MemToReg,
         ALUSourceB,
         AluOp,
+        ShiftControl,
         PCSource
     );
 endmodule
