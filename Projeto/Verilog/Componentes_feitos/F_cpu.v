@@ -49,7 +49,7 @@ module F_cpu (
     wire [31:0] LS_out;
     wire [31:0] REGS_out1;
     wire [31:0] REGS_out2;
-    wire [31:0] SL2_out     = 32'd0;
+    wire [31:0] SL2_out;
     wire [31:0] SE16_32_out;
     wire [31:0] SE1_32_out;
     wire [31:0] EPC_out;
@@ -164,14 +164,10 @@ module F_cpu (
         SE1_32_out
     );
 
-    /*RegDesloc shift_left2_offset (
-        clk,
-		reset,
-		3'b010,
-		5'b00010,
-		SE16_32_out,
+    F_shift_left_2 Shift_Left2_ (
+        SE16_32_out,
 		SL2_out
-    );*/
+    );
 
     Registrador MDR_ (
         clk,

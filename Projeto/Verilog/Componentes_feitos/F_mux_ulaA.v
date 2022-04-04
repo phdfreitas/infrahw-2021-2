@@ -6,9 +6,9 @@ module F_mux_ulaA (
     output wire    [31:0]  Data_out 
 );
 
-    wire [31:0] OX;
+    wire [31:0] W1;
 
-    assign OX       = (selector[0]) ? Data_1 : Data_0;
-    assign Data_out = (selector[1]) ? Data_2 : OX;
+    assign W1       = (selector[0]) ? Data_1 : Data_0;
+    assign Data_out = (selector[1]) ? Data_2 : W1;
     
 endmodule
