@@ -5,7 +5,7 @@ module F_cpu (
 
 // =-=-=-=-= Sinais da unidade de controle =-=-=-=-=
     // =-=-=-=-= UNITÁRIOS =-=-=-=-= 
-    wire PC_write;
+    wire PC_writeUC;
     wire PC_write_cond;
     wire MEMRead;
     wire IRWrite;
@@ -106,6 +106,7 @@ module F_cpu (
     wire mux_branch_out;
     wire zero_not_out;
     wire GT_not_out;
+    wire PC_write;
 // =-=-=-=-= Data wires End =-=-=-=-=
 
     Registrador PC_ (
@@ -333,12 +334,12 @@ module F_cpu (
 
     );
 
-    /*F_not ZNOT_ (
+    F_notgate ZNOT_ (
         zero,
         zero_not_out
     );
 
-    F_not GTNOT_ (
+    F_notgate GTNOT_ (
         GT,
         GT_not_out
     );
@@ -362,7 +363,7 @@ module F_cpu (
         GT,
         GT_not_out,
         mux_branch_out
-    );*/
+    );
 
     F_ctrl_unit CONTROL_ (
         clk,
@@ -379,7 +380,7 @@ module F_cpu (
         FUNCT,
     
     // Sinais de controle unitários //
-        PC_write,
+        PC_writeUC,
         PC_write_cond,
         MEMRead,
         IRWrite,
@@ -397,6 +398,7 @@ module F_cpu (
         load_size_control,
         shamt_control,
         shiftSource_control,
+        ALULogic,
 
     // Controles de três dígitos
         IorD,
