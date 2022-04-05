@@ -104,7 +104,7 @@ parameter END_IMMEDIATE     = 6'd42;
 parameter ATRASA_PROX_INSTR = 6'd43; // Monitor tinha falado pra retardar alguma instrução, agora todas são retartadas em 1 step
 parameter SHIFT_WITH_SHAMT  = 6'd44;
 parameter SHIFT_WITH_RT     = 6'd45;
-parameter END_SLL_SRA_SRL   = 6'd46;
+parameter END_SHIFT         = 6'd46;
 parameter SHIFT_WAIT        = 6'd47;
 //
 //
@@ -331,6 +331,12 @@ always @(posedge clk) begin
                         R_FORMAT_SRA: begin
                             STATE = SHIFT_WITH_SHAMT;
                         end
+                        R_FORMAT_SRAV: begin
+                            STATE = SHIFT_WITH_RT;
+                        end
+                        R_FORMAT_SLLV: begin
+                            STATE = SHIFT_WITH_RT;
+                        end
                     endcase
                 end
                 // I type
@@ -498,6 +504,41 @@ always @(posedge clk) begin
             end
         end
 
+        else if(STATE == SHIFT_WITH_RT) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd3; //
+            shiftSourceControl  = 1'd0; //
+            ALULogic            = 2'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd0;
+            ShiftControl        = 3'd1; //
+            PCSource            = 3'd0;
+
+            if(funct == R_FORMAT_SLLV) begin
+                STATE = SLLV;
+            end
+            else if(funct == R_FORMAT_SRAV) begin
+                STATE = SRAV; 
+            end
+        end
+
         else if(STATE == SLL) begin
             PC_write            = 1'd0;
             PC_write_cond       = 1'd0;
@@ -588,6 +629,66 @@ always @(posedge clk) begin
             STATE = SHIFT_WAIT;
         end
 
+        else if(STATE == SLLV) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
+            ALULogic            = 2'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd0;
+            ShiftControl        = 3'd2; //
+            PCSource            = 3'd0;
+
+            STATE = SHIFT_WAIT;
+        end
+
+        else if(STATE == SRAV) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
+            ALULogic            = 2'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd0;
+            ShiftControl        = 3'd4; //
+            PCSource            = 3'd0;
+
+            STATE = SHIFT_WAIT;
+        end
+
         else if(STATE == SHIFT_WAIT) begin
             PC_write            = 1'd0;
             PC_write_cond       = 1'd0;
@@ -615,10 +716,10 @@ always @(posedge clk) begin
             ShiftControl        = 3'd0; //
             PCSource            = 3'd0;
 
-            STATE = END_SLL_SRA_SRL;
+            STATE = END_SHIFT;
         end
 
-        else if(STATE == END_SLL_SRA_SRL) begin
+        else if(STATE == END_SHIFT) begin
             PC_write            = 1'd0;
             PC_write_cond       = 1'd0;
             MEMRead             = 1'd0;
