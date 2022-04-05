@@ -546,6 +546,7 @@ always @(posedge clk) begin
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
             shiftSourceControl  = 1'd0;
+            ALULogic            = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0;
@@ -575,6 +576,7 @@ always @(posedge clk) begin
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
             shiftSourceControl  = 1'd0;
+            ALULogic            = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0;
@@ -604,6 +606,7 @@ always @(posedge clk) begin
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0; //
             shiftSourceControl  = 1'd0; //
+            ALULogic            = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0;

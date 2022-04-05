@@ -350,11 +350,11 @@ module F_cpu (
         branch_signal
     );
 
-    F_orgate OR_ (
+    /*F_orgate OR_ (
        branch_signal,  // saida do and
        PC_writeUC,     // sinal da un de controle
        PC_write        // pc_write real (nao o da un de controle)
-    );
+    );*/
 
     F_mux_aluLogic M_BRANCH_ (
         ALULogic,
@@ -380,7 +380,7 @@ module F_cpu (
         FUNCT,
     
     // Sinais de controle unitários //
-        PC_writeUC,
+/**/    PC_write,                   // =-=-=-=-= Não Mudar sem Testar as instruções que estão funcionando =-=-=-=-=
         PC_write_cond,
         MEMRead,
         IRWrite,
