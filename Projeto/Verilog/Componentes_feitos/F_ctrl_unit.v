@@ -100,10 +100,11 @@ parameter JAL               = 6'd40;
 // ----- END AND EXTRAS INSTRUCTIONS -----
 parameter END_ADD_SUB_AND   = 6'd41;
 parameter END_IMMEDIATE     = 6'd42;
-parameter END_SLL_SRA_SRL   = 6'h46;
 parameter ATRASA_PROX_INSTR = 6'd43; // Monitor tinha falado pra retardar alguma instrução, agora todas são retartadas em 1 step
 parameter SHIFT_WITH_SHAMT  = 6'd44;
 parameter SHIFT_WITH_RT     = 6'd45;
+parameter END_SLL_SRA_SRL   = 6'd46;
+parameter SHIFT_WAIT        = 6'd47;
 //
 //
 // ----- OPCODE AND FUNCT VALUE (R FORMAT INSTRUCTIONS) -----
@@ -501,14 +502,101 @@ always @(posedge clk) begin
             ALUSourceA          = 2'd0;
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
-            shamtControl        = 2'd0; //
-            shiftSourceControl  = 1'd1; //
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0;
             ALUSourceB          = 3'd0;
             AluOp               = 3'd0;
             ShiftControl        = 3'd2; //
+            PCSource            = 3'd0;
+
+            STATE = SHIFT_WAIT;
+        end
+
+        else if(STATE == SRL) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd0;
+            ShiftControl        = 3'd3; //
+            PCSource            = 3'd0;
+
+            STATE = SHIFT_WAIT;
+        end
+
+        else if(STATE == SRA) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd0;
+            ShiftControl        = 3'd4; //
+            PCSource            = 3'd0;
+
+            STATE = SHIFT_WAIT;
+        end
+
+        else if(STATE == SHIFT_WAIT) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0; //
+            shiftSourceControl  = 1'd0; //
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd0;
+            ShiftControl        = 3'd0; //
             PCSource            = 3'd0;
 
             STATE = END_SLL_SRA_SRL;
