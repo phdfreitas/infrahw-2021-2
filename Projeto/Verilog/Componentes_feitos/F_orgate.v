@@ -4,6 +4,7 @@ module F_orgate(
     output wire   PC_write
 );
 
+
 assign PC_write = branch_signal | PC_write_UC;
 
 endmodule
