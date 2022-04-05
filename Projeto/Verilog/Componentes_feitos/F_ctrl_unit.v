@@ -106,6 +106,7 @@ parameter SHIFT_WITH_SHAMT  = 6'd44;
 parameter SHIFT_WITH_RT     = 6'd45;
 parameter END_SHIFT         = 6'd46;
 parameter SHIFT_WAIT        = 6'd47;
+parameter END_SLT_SLTI      = 6'd48;
 //
 //
 // ----- OPCODE AND FUNCT VALUE (R FORMAT INSTRUCTIONS) -----
@@ -127,6 +128,9 @@ parameter R_FORMAT_SUB       = 6'h22;
 parameter R_FORMAT_BREAK     = 6'hD;
 parameter R_FORMAT_RTE       = 6'h13;
 parameter R_FORMAT_ADDM      = 6'h5;
+
+// ----- OPCODE AND FUNCT VALUE (R FORMAT INSTRUCTIONS) -----
+parameter I_FORMAT_SLTI    = 6'hA;
 
 initial begin
     STATE = INSTRUCTION_FETCH;
@@ -337,11 +341,17 @@ always @(posedge clk) begin
                         R_FORMAT_SLLV: begin
                             STATE = SHIFT_WITH_RT;
                         end
+                        R_FORMAT_SLT: begin
+                            STATE = SLT;
+                        end
                     endcase
                 end
                 // I type
                 6'h8: begin
                     STATE = ADDI;
+                end
+                I_FORMAT_SLTI: begin
+                    STATE = SLTI;
                 end
             endcase
         end
@@ -749,6 +759,36 @@ always @(posedge clk) begin
             STATE = ATRASA_PROX_INSTR;
         end
 
+        else if(STATE == SLT) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd1;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd3;
+            ALUSourceA          = 2'd1; //
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0; 
+            shiftSourceControl  = 1'd0;
+            ALULogic            = 2'd0; 
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd4; 
+            ALUSourceB          = 3'd0; //
+            AluOp               = 3'd7; //
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd0;
+
+            STATE = ATRASA_PROX_INSTR;
+        end
+//////////////////////////////////////////////////////////////////////////////////////
         else if(STATE == ADDI) begin
             PC_write            = 1'd0;
             PC_write_cond       = 1'd0;
