@@ -112,6 +112,7 @@ parameter LOAD_STORE_COMMON = 6'd49;
 parameter LOAD_BASIC_STEP   = 6'd50;
 parameter LOAD_INTER_STEP   = 6'd51;
 parameter LOAD_FINAL_STEP   = 6'd52;
+parameter LW_FINAL          = 6'd53;
 
 //
 //
