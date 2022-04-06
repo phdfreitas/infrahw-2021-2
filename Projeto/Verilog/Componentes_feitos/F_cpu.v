@@ -5,7 +5,7 @@ module F_cpu (
 
 // =-=-=-=-= Sinais da unidade de controle =-=-=-=-=
     // =-=-=-=-= UNITÁRIOS =-=-=-=-= 
-    wire PC_writeUC;
+    wire PC_write;
     wire PC_write_cond;
     wire MEMRead;
     wire IRWrite;
@@ -15,7 +15,6 @@ module F_cpu (
     wire B_Write; 
     wire AluOutWrite;
     wire EPCWrite;
-    wire ALULogic;
     wire shiftSource_control;
 
     // =-=-=-= EXCEPTIONS =-=-=-= // 
@@ -103,16 +102,13 @@ module F_cpu (
     wire GT;
     wire Igual;
 
-    wire mux_branch_out;
-    wire zero_not_out;
-    wire GT_not_out;
-    wire PC_write;
+    wire PC_w;
 // =-=-=-=-= Data wires End =-=-=-=-=
 
     Registrador PC_ (
         clk,
         reset,
-        PC_write,
+        PC_w,
         mux_PCSource_out,
         PC_out
     );
@@ -334,11 +330,11 @@ module F_cpu (
 
     );
 
-    /*F_orgate OR_ (
-       branch_signal,  // saida do and
-       PC_writeUC,     // sinal da un de controle
-       PC_write        // pc_write real (nao o da un de controle)
-    );*/
+    F_orgate OR_ (
+       PC_write_cond,  // saida do and
+       PC_write,     // sinal da un de controle
+       PC_w        // pc_write real (nao o da un de controle)
+    );
 
     F_ctrl_unit CONTROL_ (
         clk,
