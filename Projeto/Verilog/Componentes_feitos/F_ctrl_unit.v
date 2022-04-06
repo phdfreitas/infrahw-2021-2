@@ -108,6 +108,7 @@ parameter END_SHIFT         = 6'd46;
 parameter SHIFT_WAIT        = 6'd47;
 parameter END_SLT_SLTI      = 6'd48;
 parameter END_BEQ           = 6'd54;
+parameter END_BNE           = 6'd55;
 
 parameter LOAD_STORE_COMMON = 6'd49;
 parameter LOAD_BASIC_STEP   = 6'd50;
@@ -387,6 +388,9 @@ always @(posedge clk) begin
                 end
                 I_FORMAT_BEQ: begin
                     STATE = BEQ;
+                end
+                I_FORMAT_BNE: begin
+                    STATE = BNE;
                 end
             endcase
         end
@@ -1105,6 +1109,97 @@ always @(posedge clk) begin
                 STATE = ATRASA_PROX_INSTR;
             end
             else if (igual == 1'd0) begin
+                PC_write            = 1'd0;
+                PC_write_cond       = 1'd0;
+                MEMRead             = 1'd0;
+                IRWrite             = 1'd0;
+                RegWrite            = 1'd0;
+                A_write             = 1'd0;
+                B_write             = 1'd0;
+                MDR_load            = 1'd0;
+                EPCWrite            = 1'd0;
+                AluOutWrite         = 1'd0;
+
+                RegDst              = 2'd0; 
+                ALUSourceA          = 2'd0;
+                storeControl        = 2'd0;
+                loadSizeControl     = 2'd0;
+                shamtControl        = 2'd0;
+                shiftSourceControl  = 1'd0;
+                ALULogic            = 2'd0;
+
+                IorD                = 3'd0;
+                MemToReg            = 3'd0;
+                ALUSourceB          = 3'd0;
+                AluOp               = 3'd0;
+                ShiftControl        = 3'd0;
+                PCSource            = 3'd0;
+
+                STATE = ATRASA_PROX_INSTR;
+            end
+        end
+
+        else if(STATE == BNE) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd1; //
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
+            ALULogic            = 2'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd0; 
+            ALUSourceB          = 3'd0; //
+            AluOp               = 3'd2; //
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd1; //
+
+            STATE = END_BNE;
+        end
+
+        else if(STATE == END_BNE) begin
+            if (igual == 1'd0) begin
+                PC_write            = 1'd0;
+                PC_write_cond       = 1'd1; //
+                MEMRead             = 1'd0;
+                IRWrite             = 1'd0;
+                RegWrite            = 1'd0;
+                A_write             = 1'd0;
+                B_write             = 1'd0;
+                MDR_load            = 1'd0;
+                EPCWrite            = 1'd0;
+                AluOutWrite         = 1'd0;
+
+                RegDst              = 2'd0; 
+                ALUSourceA          = 2'd0;
+                storeControl        = 2'd0;
+                loadSizeControl     = 2'd0;
+                shamtControl        = 2'd0;
+                shiftSourceControl  = 1'd0;
+                ALULogic            = 2'd0;
+
+                IorD                = 3'd0;
+                MemToReg            = 3'd0;
+                ALUSourceB          = 3'd0;
+                AluOp               = 3'd0;
+                ShiftControl        = 3'd0;
+                PCSource            = 3'd1;
+
+                STATE = ATRASA_PROX_INSTR;
+            end
+            else if (igual == 1'd1) begin
                 PC_write            = 1'd0;
                 PC_write_cond       = 1'd0;
                 MEMRead             = 1'd0;
