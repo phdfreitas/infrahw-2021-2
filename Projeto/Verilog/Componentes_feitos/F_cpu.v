@@ -334,36 +334,11 @@ module F_cpu (
 
     );
 
-    F_notgate ZNOT_ (
-        zero,
-        zero_not_out
-    );
-
-    F_notgate GTNOT_ (
-        GT,
-        GT_not_out
-    );
-
-    F_andgate AND_ (
-        mux_branch_out,
-        PC_write_cond,
-        branch_signal
-    );
-
     /*F_orgate OR_ (
        branch_signal,  // saida do and
        PC_writeUC,     // sinal da un de controle
        PC_write        // pc_write real (nao o da un de controle)
     );*/
-
-    F_mux_aluLogic M_BRANCH_ (
-        ALULogic,
-        zero,
-        zero_not_out,
-        GT,
-        GT_not_out,
-        mux_branch_out
-    );
 
     F_ctrl_unit CONTROL_ (
         clk,
