@@ -174,11 +174,11 @@ module F_cpu (
         MDR_out
     );
 
-    F_load_size LS_ (
+    /*F_load_size LS_ (
         load_size_control,
         MDR_out,
         LS_out
-    );
+    );*/
 
     F_mux_shiftSource shiftSource_ (
         shiftSource_control,
@@ -222,7 +222,7 @@ module F_cpu (
         STACK_START,
         SE1_32_out,
         LO_out,
-        LS_out,
+        MDR_out,   // LOCAL DE LOADSIZEOUT
         mux_MemToReg_out
     );
 
@@ -323,7 +323,7 @@ module F_cpu (
         ALUOut_out,
         EPC_out,
         extend_28_32_out,
-        LS_out,    
+        MDR_out,    // LOCAL DE LOADSIZEOUT
         RegA_out, 
 
         mux_PCSource_out 
