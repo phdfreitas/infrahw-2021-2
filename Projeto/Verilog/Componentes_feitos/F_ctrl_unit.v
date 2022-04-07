@@ -148,7 +148,7 @@ parameter R_FORMAT_DIV       = 7'h1A;
 parameter R_FORMAT_MULT      = 7'h18;
 parameter R_FORMAT_JR        = 7'h8;
 parameter R_FORMAT_MFHI      = 7'h10;
-parameter R_FORMAT_MHLO      = 7'h12;
+parameter R_FORMAT_MFLO      = 7'h12;
 parameter R_FORMAT_SLL       = 7'h0;
 parameter R_FORMAT_SLLV      = 7'h4;
 parameter R_FORMAT_SLT       = 7'h2A;
@@ -396,6 +396,12 @@ always @(posedge clk) begin
                         end
                         R_FORMAT_ADDM: begin
                             STATE = ADDM;
+                        end
+                        R_FORMAT_MFHI: begin
+                            STATE = MFHI;
+                        end
+                        R_FORMAT_MFLO: begin
+                            STATE = MFLO;
                         end
                     endcase
                 end
@@ -1178,6 +1184,64 @@ always @(posedge clk) begin
             MemToReg            = 3'd0; //
             ALUSourceB          = 3'd2; 
             AluOp               = 3'd1; 
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd0; 
+
+            STATE = ATRASA_PROX_INSTR;
+        end
+
+        else if(STATE == MFHI) begin 
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd1; //
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd1;
+
+            RegDst              = 2'd3; //
+            ALUSourceA          = 2'd2; 
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0; 
+            shiftSourceControl  = 1'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd1; //
+            ALUSourceB          = 3'd0; 
+            AluOp               = 3'd0; 
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd0; 
+
+            STATE = ATRASA_PROX_INSTR;
+        end
+
+        else if(STATE == MFLO) begin 
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd1; //
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd1;
+
+            RegDst              = 2'd3; //
+            ALUSourceA          = 2'd2; 
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0; 
+            shiftSourceControl  = 1'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd5; //
+            ALUSourceB          = 3'd0; 
+            AluOp               = 3'd0; 
             ShiftControl        = 3'd0;
             PCSource            = 3'd0; 
 

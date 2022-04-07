@@ -13,9 +13,12 @@ module F_cpu (
     wire RegWrite;
     wire A_Write; 
     wire B_Write; 
+    wire Hi_Write       = 1;
+    wire Lo_Write       = 1;
+    wire divMultControl = 1;
     wire AluOutWrite;
     wire EPCWrite;
-    wire [1:0] shiftSource_control;
+    
 
     // =-=-=-= EXCEPTIONS =-=-=-= // 
     wire Overflow;
@@ -26,6 +29,7 @@ module F_cpu (
     wire [1:0] store_control_sign;
     wire [1:0] load_size_control;
     wire [1:0] shamt_control;
+    wire [1:0] shiftSource_control;
 
     // =-=-=-=-= TRÊS DÍGITOS =-=-=-=-=
     wire [2:0] IorD;
@@ -55,13 +59,15 @@ module F_cpu (
     wire [31:0] SC_out;
     wire [31:0] Shift_Reg_out;
     wire [31:0] shiftSource_out;
-    wire [31:0] HI_out      = 32'd0;
-    wire [31:0] LO_out      = 32'd0;
+    wire [31:0] HI_out;
+    wire [31:0] LO_out;
     wire [31:0] mux_IorD_out;
     wire [31:0] mux_PCSource_out;
     wire [31:0] mux_MemToReg_out;
     wire [31:0] mux_aluA_out;
     wire [31:0] mux_aluB_out;
+    wire [31:0] mux_Hi_out;
+    wire [31:0] mux_Lo_out;
     wire [4:0]  mux_regDst_out;
 
     // INSTRUCTIONS
@@ -172,6 +178,36 @@ module F_cpu (
         MDRWrite,
         MEM_out,
         MDR_out
+    );
+    
+    F_mux_hi Mux_HI(
+        divMultControl,
+        32'd7,
+        32'd8,
+        mux_Hi_out
+    );
+
+    Registrador HI_ (
+        clk,
+        reset,
+        Hi_Write,
+        mux_Hi_out,
+        HI_out
+    );
+
+    F_mux_lo Mux_LO(
+        divMultControl,
+        32'd9,
+        32'd10,
+        mux_Lo_out
+    );
+
+    Registrador LO_ (
+        clk,
+        reset,
+        Lo_Write,
+        mux_Lo_out,
+        LO_out
     );
 
     F_load_size LS_ (
