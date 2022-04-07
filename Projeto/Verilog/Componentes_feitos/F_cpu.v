@@ -15,7 +15,7 @@ module F_cpu (
     wire B_Write; 
     wire AluOutWrite;
     wire EPCWrite;
-    wire shiftSource_control;
+    wire [1:0] shiftSource_control;
 
     // =-=-=-= EXCEPTIONS =-=-=-= // 
     wire Overflow;
@@ -184,6 +184,7 @@ module F_cpu (
         shiftSource_control,
         RegA_out,
         RegB_out,
+        SE16_32_out,
         shiftSource_out
     );
 

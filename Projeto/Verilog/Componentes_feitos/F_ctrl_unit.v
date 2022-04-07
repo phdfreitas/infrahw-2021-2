@@ -8,8 +8,6 @@ module F_ctrl_unit(
 	input wire igual,
 	input wire gt,
 	input lt,
-    
-    //input wire divZero, 
 
     input wire [5:0] opcode,
     input wire [5:0] funct,
@@ -33,7 +31,7 @@ module F_ctrl_unit(
     output reg [1:0] storeControl,
     output reg [1:0] loadSizeControl,
     output reg [1:0] shamtControl,
-    output reg       shiftSourceControl, // posicionar no lugar correto depois
+    output reg [1:0] shiftSourceControl,
 
     // Controles de três dígitos
     output reg [2:0] IorD,
@@ -133,6 +131,10 @@ parameter ADDM_NEXT_READ    = 7'd63;
 parameter ADDM_READ_WAIT2   = 7'd64;
 parameter ADDM_FINAL        = 7'd65;
 
+parameter SHIFT_WITH_CTE    = 7'd70;
+parameter LUI_WAIT          = 7'd71;
+parameter END_LUI           = 7'd72;
+
 //
 //
 // ----- OPCODE AND FUNCT VALUE (R FORMAT INSTRUCTIONS) -----
@@ -198,7 +200,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd3; //
@@ -227,7 +229,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0; //
@@ -256,7 +258,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
 
             IorD                = 3'd0;
@@ -286,7 +288,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd3;
@@ -315,7 +317,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd3;
@@ -344,7 +346,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd3;
@@ -431,6 +433,9 @@ always @(posedge clk) begin
                 I_FORMAT_BGT: begin
                     STATE = BGT;
                 end
+                I_FORMAT_LUI: begin
+                    STATE = SHIFT_WITH_CTE;
+                end
             endcase
         end
 //
@@ -456,7 +461,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0;
@@ -485,7 +490,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0;
@@ -514,7 +519,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0;
@@ -543,7 +548,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0; //
@@ -572,7 +577,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0;
@@ -601,7 +606,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0; //
-            shiftSourceControl  = 1'd1; //
+            shiftSourceControl  = 2'd1; //
 
             IorD                = 3'd0;
             MemToReg            = 3'd0;
@@ -638,7 +643,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd3; //
-            shiftSourceControl  = 1'd0; //
+            shiftSourceControl  = 2'd0; //
 
             IorD                = 3'd0;
             MemToReg            = 3'd0;
@@ -653,6 +658,35 @@ always @(posedge clk) begin
             else if(funct == R_FORMAT_SRAV) begin
                 STATE = SRAV; 
             end
+        end
+
+        else if(STATE == SHIFT_WITH_CTE) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd1; //
+            shiftSourceControl  = 2'd2; //
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd0;
+            ShiftControl        = 3'd1; //
+            PCSource            = 3'd0;
+
+            STATE = LUI;
         end
 
         else if(STATE == SLL) begin
@@ -672,7 +706,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0; //
-            shiftSourceControl  = 1'd1; //
+            shiftSourceControl  = 2'd1; //
 
             IorD                = 3'd0;
             MemToReg            = 3'd0;
@@ -701,7 +735,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0;
@@ -730,7 +764,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0;
@@ -759,7 +793,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0;
@@ -788,7 +822,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0;
@@ -817,7 +851,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0; //
-            shiftSourceControl  = 1'd0; //
+            shiftSourceControl  = 2'd0; //
 
             IorD                = 3'd0;
             MemToReg            = 3'd0;
@@ -846,7 +880,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0; 
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
             IorD                = 3'd0;
             MemToReg            = 3'd2; // 
             ALUSourceB          = 3'd0;
@@ -874,7 +908,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0; 
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd4; 
@@ -903,7 +937,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0; 
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0; 
@@ -932,7 +966,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0; 
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd4; //
             MemToReg            = 3'd0; 
@@ -961,7 +995,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0; 
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd4;
             MemToReg            = 3'd0; 
@@ -990,7 +1024,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0; 
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd5; //
             MemToReg            = 3'd0; 
@@ -1019,7 +1053,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0; 
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd4;
             MemToReg            = 3'd0; 
@@ -1048,7 +1082,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0; 
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd4;
             MemToReg            = 3'd0; //
@@ -1081,7 +1115,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0;
@@ -1110,7 +1144,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0;
@@ -1145,7 +1179,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd6; //
             MemToReg            = 3'd0;
@@ -1174,7 +1208,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd6; //
             MemToReg            = 3'd0;
@@ -1203,7 +1237,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd6; //
             MemToReg            = 3'd0;
@@ -1240,7 +1274,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd2; //
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0; 
             MemToReg            = 3'd6; //
@@ -1269,7 +1303,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd1; //
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0; 
             MemToReg            = 3'd6; //
@@ -1298,7 +1332,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0; //
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0; 
             MemToReg            = 3'd6; //
@@ -1327,7 +1361,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd6; //
             MemToReg            = 3'd0;
@@ -1356,7 +1390,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd6; //
             MemToReg            = 3'd0;
@@ -1385,7 +1419,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd6; //
             MemToReg            = 3'd0;
@@ -1422,7 +1456,7 @@ always @(posedge clk) begin
             storeControl        = 2'd2; //
             loadSizeControl     = 2'd0; 
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd6; 
             MemToReg            = 3'd0;
@@ -1451,7 +1485,7 @@ always @(posedge clk) begin
             storeControl        = 2'd1; //
             loadSizeControl     = 2'd0; 
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd6; 
             MemToReg            = 3'd0;
@@ -1480,10 +1514,68 @@ always @(posedge clk) begin
             storeControl        = 2'd0; //
             loadSizeControl     = 2'd0; 
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd6; 
             MemToReg            = 3'd0;
+            ALUSourceB          = 3'd0; 
+            AluOp               = 3'd0; 
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd0;
+
+            STATE = ATRASA_PROX_INSTR;
+        end
+
+        else if(STATE == LUI) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0; 
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0; 
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0; 
+            shamtControl        = 2'd1; // 
+            shiftSourceControl  = 2'd2; //
+
+            IorD                = 3'd0; 
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd0; 
+            AluOp               = 3'd0; 
+            ShiftControl        = 3'd2; //
+            PCSource            = 3'd0;
+
+            STATE = END_LUI;
+        end
+
+        else if(STATE == END_LUI) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd1; //
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0; 
+
+            RegDst              = 2'd0; //
+            ALUSourceA          = 2'd0; 
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0; 
+            shamtControl        = 2'd0; 
+            shiftSourceControl  = 2'd0;
+
+            IorD                = 3'd0; 
+            MemToReg            = 3'd2; //
             ALUSourceB          = 3'd0; 
             AluOp               = 3'd0; 
             ShiftControl        = 3'd0;
@@ -1509,7 +1601,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0; 
@@ -1539,7 +1631,7 @@ always @(posedge clk) begin
                 storeControl        = 2'd0;
                 loadSizeControl     = 2'd0;
                 shamtControl        = 2'd0;
-                shiftSourceControl  = 1'd0;
+                shiftSourceControl  = 2'd0;
 
                 IorD                = 3'd0;
                 MemToReg            = 3'd0;
@@ -1567,7 +1659,7 @@ always @(posedge clk) begin
                 storeControl        = 2'd0;
                 loadSizeControl     = 2'd0;
                 shamtControl        = 2'd0;
-                shiftSourceControl  = 1'd0;
+                shiftSourceControl  = 2'd0;
 
                 IorD                = 3'd0;
                 MemToReg            = 3'd0;
@@ -1597,7 +1689,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0; 
@@ -1627,7 +1719,7 @@ always @(posedge clk) begin
                 storeControl        = 2'd0;
                 loadSizeControl     = 2'd0;
                 shamtControl        = 2'd0;
-                shiftSourceControl  = 1'd0;
+                shiftSourceControl  = 2'd0;
 
                 IorD                = 3'd0;
                 MemToReg            = 3'd0;
@@ -1655,7 +1747,7 @@ always @(posedge clk) begin
                 storeControl        = 2'd0;
                 loadSizeControl     = 2'd0;
                 shamtControl        = 2'd0;
-                shiftSourceControl  = 1'd0;
+                shiftSourceControl  = 2'd0;
 
                 IorD                = 3'd0;
                 MemToReg            = 3'd0;
@@ -1685,7 +1777,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0; 
@@ -1715,7 +1807,7 @@ always @(posedge clk) begin
                 storeControl        = 2'd0;
                 loadSizeControl     = 2'd0;
                 shamtControl        = 2'd0;
-                shiftSourceControl  = 1'd0;
+                shiftSourceControl  = 2'd0;
 
                 IorD                = 3'd0;
                 MemToReg            = 3'd0;
@@ -1743,7 +1835,7 @@ always @(posedge clk) begin
                 storeControl        = 2'd0;
                 loadSizeControl     = 2'd0;
                 shamtControl        = 2'd0;
-                shiftSourceControl  = 1'd0;
+                shiftSourceControl  = 2'd0;
 
                 IorD                = 3'd0;
                 MemToReg            = 3'd0;
@@ -1773,7 +1865,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0; 
@@ -1803,7 +1895,7 @@ always @(posedge clk) begin
                 storeControl        = 2'd0;
                 loadSizeControl     = 2'd0;
                 shamtControl        = 2'd0;
-                shiftSourceControl  = 1'd0;
+                shiftSourceControl  = 2'd0;
 
                 IorD                = 3'd0;
                 MemToReg            = 3'd0;
@@ -1831,7 +1923,7 @@ always @(posedge clk) begin
                 storeControl        = 2'd0;
                 loadSizeControl     = 2'd0;
                 shamtControl        = 2'd0;
-                shiftSourceControl  = 1'd0;
+                shiftSourceControl  = 2'd0;
 
                 IorD                = 3'd0;
                 MemToReg            = 3'd0;
@@ -1862,7 +1954,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0;
@@ -1891,7 +1983,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
-            shiftSourceControl  = 1'd0;
+            shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
             MemToReg            = 3'd0;

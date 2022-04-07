@@ -1,10 +1,14 @@
 module F_mux_shiftSource (
-    input  wire            selector,
+    input  wire    [1:0]   selector,
     input  wire    [31:0]  Data_0,
     input  wire    [31:0]  Data_1,
+    input  wire    [31:0]  Data_2,
     output wire    [31:0]  Data_out 
 );
 
-    assign Data_out = (selector) ? Data_1 : Data_0;
+    wire [31:0] W1;
+
+    assign W1       = (selector[0]) ? Data_1 : Data_0;
+    assign Data_out = (selector[1]) ? Data_2 : W1;
     
 endmodule
