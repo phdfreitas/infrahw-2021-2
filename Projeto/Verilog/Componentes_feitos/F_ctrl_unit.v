@@ -126,10 +126,13 @@ parameter SH_FINAL          = 7'd66;
 parameter SB_FINAL          = 7'd67;
 
 // ---------- ADDM Instruction ----------
-parameter ADDM_READ_WAIT    = 7'd62;
-parameter ADDM_NEXT_READ    = 7'd63;
-parameter ADDM_READ_WAIT2   = 7'd64;
-parameter ADDM_FINAL        = 7'd65;
+parameter ADDM_STEP2        = 7'd62;
+parameter ADDM_STEP3        = 7'd63;
+parameter ADDM_STEP4        = 7'd64;
+parameter ADDM_STEP5        = 7'd65;
+parameter ADDM_STEP6        = 7'd73;
+parameter ADDM_STEP7        = 7'd74;
+parameter ADDM_FINAL        = 7'd75;
 
 parameter SHIFT_WITH_CTE    = 7'd70;
 parameter LUI_WAIT          = 7'd71;
@@ -949,7 +952,7 @@ always @(posedge clk) begin
             STATE = ATRASA_PROX_INSTR;
         end
 
-        else if(STATE == ADDM) begin
+       else if(STATE == ADDM) begin  // carrega o endereço de rs na memoria
             PC_write            = 1'd0;
             PC_write_cond       = 1'd0;
             MEMRead             = 1'd0; //
@@ -966,7 +969,7 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0; 
-            shiftSourceControl  = 2'd0;
+            shiftSourceControl  = 1'd0;
 
             IorD                = 3'd4; //
             MemToReg            = 3'd0; 
@@ -975,13 +978,42 @@ always @(posedge clk) begin
             ShiftControl        = 3'd0;
             PCSource            = 3'd0;
 
-            STATE = ADDM_READ_WAIT;
+            STATE = ADDM_STEP2;
         end
 
-        else if(STATE == ADDM_READ_WAIT) begin
+        else if(STATE == ADDM_STEP2) begin // espera o valor ser carregado
             PC_write            = 1'd0;
             PC_write_cond       = 1'd0;
             MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0; 
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0; 
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0; 
+            shiftSourceControl  = 1'd0;
+
+            IorD                = 3'd4;
+            MemToReg            = 3'd0; 
+            ALUSourceB          = 3'd0; 
+            AluOp               = 3'd0; 
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd0;
+
+            STATE = ADDM_STEP3;
+        end
+
+        else if(STATE == ADDM_STEP3) begin // carrega o valor da memoria no MDR
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0; 
             IRWrite             = 1'd0;
             RegWrite            = 1'd0;
             A_write             = 1'd0;
@@ -995,19 +1027,19 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0; 
-            shiftSourceControl  = 2'd0;
+            shiftSourceControl  = 1'd0;
 
             IorD                = 3'd4;
             MemToReg            = 3'd0; 
             ALUSourceB          = 3'd0; 
             AluOp               = 3'd0; 
             ShiftControl        = 3'd0;
-            PCSource            = 3'd0;
+            PCSource            = 3'd0; 
 
-            STATE = ADDM_NEXT_READ;
+            STATE = ADDM_STEP4;
         end
 
-        else if(STATE == ADDM_NEXT_READ) begin
+        else if(STATE == ADDM_STEP4) begin // carrega rt na memoria
             PC_write            = 1'd0;
             PC_write_cond       = 1'd0;
             MEMRead             = 1'd0; //
@@ -1017,26 +1049,26 @@ always @(posedge clk) begin
             B_write             = 1'd0;
             MDR_load            = 1'd0;
             EPCWrite            = 1'd0;
-            AluOutWrite         = 1'd0;
+            AluOutWrite         = 1'd1;
 
             RegDst              = 2'd0;
-            ALUSourceA          = 2'd0; 
+            ALUSourceA          = 2'd2;
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0; 
-            shiftSourceControl  = 2'd0;
+            shiftSourceControl  = 1'd0;
 
             IorD                = 3'd5; //
             MemToReg            = 3'd0; 
-            ALUSourceB          = 3'd0; 
-            AluOp               = 3'd0; 
+            ALUSourceB          = 3'd2;
+            AluOp               = 3'd1; 
             ShiftControl        = 3'd0;
-            PCSource            = 3'd0; 
+            PCSource            = 3'd0;
 
-            STATE = ADDM_READ_WAIT2;
+            STATE = ADDM_STEP5;
         end
 
-        else if(STATE == ADDM_READ_WAIT2) begin
+        else if(STATE == ADDM_STEP5) begin // espera o valor ser carregado
             PC_write            = 1'd0;
             PC_write_cond       = 1'd0;
             MEMRead             = 1'd0;
@@ -1046,26 +1078,84 @@ always @(posedge clk) begin
             B_write             = 1'd0;
             MDR_load            = 1'd0;
             EPCWrite            = 1'd0;
-            AluOutWrite         = 1'd1; //
+            AluOutWrite         = 1'd1;
 
-            RegDst              = 2'd0;
-            ALUSourceA          = 2'd2; //
+            RegDst              = 2'd3;
+            ALUSourceA          = 2'd2; 
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0; 
-            shiftSourceControl  = 2'd0;
+            shiftSourceControl  = 1'd0;
 
-            IorD                = 3'd4;
-            MemToReg            = 3'd0; 
-            ALUSourceB          = 3'd2; //
-            AluOp               = 3'd1; // 
+            IorD                = 3'd5;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd2; 
+            AluOp               = 3'd1; 
             ShiftControl        = 3'd0;
-            PCSource            = 3'd0;
+            PCSource            = 3'd0; 
+
+            STATE = ADDM_STEP6;
+        end
+
+        else if(STATE == ADDM_STEP6) begin // faz a soma de mem[rt] + mem[rs]
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0; //
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd3; //
+            ALUSourceA          = 2'd2; 
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0; 
+            shiftSourceControl  = 1'd0;
+
+            IorD                = 3'd5;
+            MemToReg            = 3'd0; //
+            ALUSourceB          = 3'd2; 
+            AluOp               = 3'd1; 
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd0; 
+
+            STATE = ADDM_STEP7;
+        end
+
+        else if(STATE == ADDM_STEP7) begin // salva o resultado no reg aluOut
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0; //
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd1;
+
+            RegDst              = 2'd3; //
+            ALUSourceA          = 2'd2; 
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0; 
+            shiftSourceControl  = 1'd0;
+
+            IorD                = 3'd5;
+            MemToReg            = 3'd0; //
+            ALUSourceB          = 3'd2; 
+            AluOp               = 3'd1; 
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd0; 
 
             STATE = ADDM_FINAL;
         end
 
-        else if(STATE == ADDM_FINAL) begin
+        else if(STATE == ADDM_FINAL) begin // salva o valor de aluOut no endereço destino
             PC_write            = 1'd0;
             PC_write_cond       = 1'd0;
             MEMRead             = 1'd0;
@@ -1082,9 +1172,9 @@ always @(posedge clk) begin
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0; 
-            shiftSourceControl  = 2'd0;
+            shiftSourceControl  = 1'd0;
 
-            IorD                = 3'd4;
+            IorD                = 3'd5;
             MemToReg            = 3'd0; //
             ALUSourceB          = 3'd2; 
             AluOp               = 3'd1; 
