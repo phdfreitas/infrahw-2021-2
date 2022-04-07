@@ -27,7 +27,6 @@ module F_ctrl_unit(
     output reg EPCWrite,
     output reg AluOutWrite,
 
-
     // Sinais de controle dois dígitos
     output reg [1:0] RegDst,
     output reg [1:0] ALUSourceA,
@@ -117,12 +116,18 @@ parameter LOAD_BASIC_STEP   = 7'd50;
 parameter LOAD_INTER_STEP   = 7'd51;
 parameter LOAD_FINAL_STEP   = 7'd52;
 parameter LW_FINAL          = 7'd53;
+parameter LH_FINAL          = 7'd68;
+parameter LB_FINAL          = 7'd69;
 
 // ---------- Store Control ----------
 parameter STORE_BASIC_STEP  = 7'd58;
 parameter STORE_INTER_STEP  = 7'd59;
 parameter STORE_FINAL_STEP  = 7'd60;
 parameter SW_FINAL          = 7'd61;
+parameter SH_FINAL          = 7'd66;
+parameter SB_FINAL          = 7'd67;
+
+// ---------- ADDM Instruction ----------
 parameter ADDM_READ_WAIT    = 7'd62;
 parameter ADDM_NEXT_READ    = 7'd63;
 parameter ADDM_READ_WAIT2   = 7'd64;
@@ -396,7 +401,19 @@ always @(posedge clk) begin
                 I_FORMAT_LW: begin
                     STATE = LOAD_STORE_COMMON;
                 end
+                I_FORMAT_LH: begin
+                    STATE = LOAD_STORE_COMMON;
+                end
+                I_FORMAT_LB: begin
+                    STATE = LOAD_STORE_COMMON;
+                end
                 I_FORMAT_SW: begin
+                    STATE = LOAD_STORE_COMMON;
+                end
+                I_FORMAT_SH: begin
+                    STATE = LOAD_STORE_COMMON;
+                end
+                I_FORMAT_SB: begin
                     STATE = LOAD_STORE_COMMON;
                 end
                 I_FORMAT_BEQ: begin
@@ -1071,10 +1088,10 @@ always @(posedge clk) begin
             PCSource            = 3'd0;
 
             // Adicionar um if/else depois
-            if (opcode == I_FORMAT_LW) begin
+            if (opcode == I_FORMAT_LW || opcode == I_FORMAT_LH || opcode == I_FORMAT_LB) begin
                 STATE = LOAD_BASIC_STEP;
             end
-            else if (opcode == I_FORMAT_SW) begin
+            else if (opcode == I_FORMAT_SW || opcode == I_FORMAT_SH || opcode == I_FORMAT_SB) begin
                 STATE = STORE_BASIC_STEP;
             end
         end
@@ -1163,7 +1180,73 @@ always @(posedge clk) begin
             ShiftControl        = 3'd0;
             PCSource            = 3'd0;
 
-            STATE = LW_FINAL;
+            if(opcode == I_FORMAT_LB) begin
+                STATE = LB_FINAL;
+            end
+            else if(opcode == I_FORMAT_LH) begin
+                STATE = LH_FINAL;
+            end
+            else if(opcode == I_FORMAT_LW) begin
+                STATE = LW_FINAL;
+            end
+        end
+
+        else if(STATE == LB_FINAL) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd1; //
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0; // 
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0; 
+
+            RegDst              = 2'd0; //
+            ALUSourceA          = 2'd0; 
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd2; //
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
+
+            IorD                = 3'd0; 
+            MemToReg            = 3'd6; //
+            ALUSourceB          = 3'd0; 
+            AluOp               = 3'd0; 
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd0;
+
+            STATE = ATRASA_PROX_INSTR;
+        end
+
+        else if(STATE == LH_FINAL) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd1; //
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0; // 
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0; 
+
+            RegDst              = 2'd0; //
+            ALUSourceA          = 2'd0; 
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd1; //
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
+
+            IorD                = 3'd0; 
+            MemToReg            = 3'd6; //
+            ALUSourceB          = 3'd0; 
+            AluOp               = 3'd0; 
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd0;
+
+            STATE = ATRASA_PROX_INSTR;
         end
 
         else if(STATE == LW_FINAL) begin
@@ -1208,7 +1291,7 @@ always @(posedge clk) begin
             AluOutWrite         = 1'd0; //
 
             RegDst              = 2'd0;
-            ALUSourceA          = 2'd1;
+            ALUSourceA          = 2'd1; //
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
@@ -1216,8 +1299,8 @@ always @(posedge clk) begin
 
             IorD                = 3'd6; //
             MemToReg            = 3'd0;
-            ALUSourceB          = 3'd3; 
-            AluOp               = 3'd1;
+            ALUSourceB          = 3'd3; //
+            AluOp               = 3'd1; //
             ShiftControl        = 3'd0;
             PCSource            = 3'd0;
 
@@ -1227,25 +1310,25 @@ always @(posedge clk) begin
          else if(STATE == STORE_INTER_STEP) begin
             PC_write            = 1'd0;
             PC_write_cond       = 1'd0;
-            MEMRead             = 1'd0;
+            MEMRead             = 1'd0; //
             IRWrite             = 1'd0;
             RegWrite            = 1'd0;
             A_write             = 1'd0;
             B_write             = 1'd0;
             MDR_load            = 1'd0;
             EPCWrite            = 1'd0;
-            AluOutWrite         = 1'd0;
+            AluOutWrite         = 1'd0; //
 
             RegDst              = 2'd0;
-            ALUSourceA          = 2'd1;
+            ALUSourceA          = 2'd1; //
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
             shamtControl        = 2'd0;
             shiftSourceControl  = 1'd0;
 
-            IorD                = 3'd6;
+            IorD                = 3'd6; //
             MemToReg            = 3'd0;
-            ALUSourceB          = 3'd3;
+            ALUSourceB          = 3'd3; //
             AluOp               = 3'd1;
             ShiftControl        = 3'd0;
             PCSource            = 3'd0;
@@ -1256,30 +1339,96 @@ always @(posedge clk) begin
         else if(STATE == STORE_FINAL_STEP) begin
             PC_write            = 1'd0;
             PC_write_cond       = 1'd0;
-            MEMRead             = 1'd0;
+            MEMRead             = 1'd0; // 
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd1; //
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd1; // 
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
+
+            IorD                = 3'd6; //
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd3; // 
+            AluOp               = 3'd1; //
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd0;
+
+            if(opcode == I_FORMAT_SB) begin
+                STATE = SB_FINAL;
+            end
+            else if(opcode == I_FORMAT_SH) begin
+                STATE = SH_FINAL;
+            end
+            else if(opcode == I_FORMAT_SW) begin
+                STATE = SW_FINAL;
+            end
+        end
+
+        else if(STATE == SB_FINAL) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd1; //
             IRWrite             = 1'd0;
             RegWrite            = 1'd0;
             A_write             = 1'd0;
             B_write             = 1'd0;
             MDR_load            = 1'd0;
             EPCWrite            = 1'd0;
-            AluOutWrite         = 1'd0;
+            AluOutWrite         = 1'd0; 
 
             RegDst              = 2'd0;
-            ALUSourceA          = 2'd1;
-            storeControl        = 2'd0;
-            loadSizeControl     = 2'd0;
+            ALUSourceA          = 2'd0; 
+            storeControl        = 2'd2; //
+            loadSizeControl     = 2'd0; 
             shamtControl        = 2'd0;
             shiftSourceControl  = 1'd0;
 
-            IorD                = 3'd6;
+            IorD                = 3'd6; 
             MemToReg            = 3'd0;
-            ALUSourceB          = 3'd3;
-            AluOp               = 3'd1;
+            ALUSourceB          = 3'd0; 
+            AluOp               = 3'd0; 
             ShiftControl        = 3'd0;
             PCSource            = 3'd0;
 
-            STATE = SW_FINAL;
+            STATE = ATRASA_PROX_INSTR;
+        end
+
+        else if(STATE == SH_FINAL) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd1; //
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0; 
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0; 
+            storeControl        = 2'd1; //
+            loadSizeControl     = 2'd0; 
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 1'd0;
+
+            IorD                = 3'd6; 
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd0; 
+            AluOp               = 3'd0; 
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd0;
+
+            STATE = ATRASA_PROX_INSTR;
         end
 
         else if(STATE == SW_FINAL) begin
