@@ -369,7 +369,6 @@ module F_cpu (
         load_size_control,
         shamt_control,
         shiftSource_control,
-        ALULogic,
 
     // Controles de três dígitos
         IorD,
