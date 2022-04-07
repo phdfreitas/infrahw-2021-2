@@ -2090,7 +2090,6 @@ always @(posedge clk) begin
             end
         end
 
-
         else if(STATE == END_IMMEDIATE) begin
             PC_write            = 1'd0;
             PC_write_cond       = 1'd0;
@@ -2114,6 +2113,35 @@ always @(posedge clk) begin
             MemToReg            = 3'd0;
             ALUSourceB          = 3'd0;
             AluOp               = 3'd0;
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd0;
+
+            STATE = ATRASA_PROX_INSTR;
+        end
+
+        else if(STATE == SLTI) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd1; //
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0; //
+            ALUSourceA          = 2'd1; //
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 2'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd4; //
+            ALUSourceB          = 3'd3; //
+            AluOp               = 3'd7; //
             ShiftControl        = 3'd0;
             PCSource            = 3'd0;
 
