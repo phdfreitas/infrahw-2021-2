@@ -421,6 +421,9 @@ always @(posedge clk) begin
                 I_FORMAT_ADDI: begin
                     STATE = ADDI;
                 end
+                I_FORMAT_ADDIU: begin
+                    STATE = ADDI; // mesma coisa do ADDI, o if vai garantir a diferença entre as duas instruções.
+                end
                 I_FORMAT_SLTI: begin
                     STATE = SLTI;
                 end
@@ -1313,7 +1316,7 @@ always @(posedge clk) begin
 
             STATE = END_IMMEDIATE;
 
-            if (overflow == 1) begin
+            if (overflow == 1 && opcode == I_FORMAT_ADDI) begin
                 STATE = OVERFLOW_EXCEPTION;
             end
         end
