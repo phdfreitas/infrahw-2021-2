@@ -140,10 +140,14 @@ parameter LUI_WAIT          = 7'd71;
 parameter END_LUI           = 7'd72;
 
 // ---------- EXCEPTIONS ----------
-parameter EXCEPTION          = 7'd77;
-parameter OPCODE_INEXISTENTE = 7'd78;
-parameter EXCEPTION_WAIT     = 7'd80;
-parameter EXCEPTION_FINAL    = 7'd81;
+parameter OPCODE_EXCEPTION   = 7'd77;
+parameter OPCODE_STEP2       = 7'd78;
+parameter EXCEPTION_WAIT     = 7'd79;
+parameter EXCEPTION_FINAL    = 7'd80;
+parameter OVERFLOW_EXCEPTION = 7'd81;
+parameter OVERFLOW_STEP2     = 7'd82;
+parameter OVERFLOW_WAIT      = 7'd83;
+parameter OVERFLOW_FINAL     = 7'd84;
 //
 // ----- OPCODE AND FUNCT VALUE (R FORMAT INSTRUCTIONS) -----
 parameter R_FORMAT_OPCODE    = 7'h0;
@@ -409,7 +413,7 @@ always @(posedge clk) begin
                             STATE = MFLO;
                         end
                         default     : begin
-                             STATE = EXCEPTION;
+                             STATE = OPCODE_EXCEPTION;
                         end
                     endcase
                 end
@@ -461,7 +465,7 @@ always @(posedge clk) begin
                     STATE = JAL;
                 end
                 default     : begin
-                   STATE = EXCEPTION;
+                   STATE = OPCODE_EXCEPTION;
                 end
             endcase
         end
@@ -498,6 +502,9 @@ always @(posedge clk) begin
             PCSource            = 3'd0;
 
             STATE = END_ADD_SUB_AND;
+            if (overflow == 1) begin
+                STATE = OVERFLOW_EXCEPTION;
+            end
         end
 
         else if(STATE == SUB) begin
@@ -527,6 +534,10 @@ always @(posedge clk) begin
             PCSource            = 3'd0;
 
             STATE = END_ADD_SUB_AND;
+
+            if (overflow == 1) begin
+                STATE = OVERFLOW_EXCEPTION;
+            end
         end
 
         else if(STATE == AND) begin
@@ -1148,6 +1159,10 @@ always @(posedge clk) begin
             PCSource            = 3'd0; 
 
             STATE = ADDM_STEP7;
+
+            if (overflow == 1) begin
+                STATE = OVERFLOW_EXCEPTION;
+            end
         end
 
         else if(STATE == ADDM_STEP7) begin // salva o resultado no reg aluOut
@@ -1297,6 +1312,10 @@ always @(posedge clk) begin
             PCSource            = 3'd0;
 
             STATE = END_IMMEDIATE;
+
+            if (overflow == 1) begin
+                STATE = OVERFLOW_EXCEPTION;
+            end
         end
 
         else if(STATE == LOAD_STORE_COMMON) begin
@@ -2253,7 +2272,7 @@ always @(posedge clk) begin
             STATE = ATRASA_PROX_INSTR;
         end
 
-        else if(STATE == EXCEPTION) begin
+        else if(STATE == OPCODE_EXCEPTION) begin
             PC_write            = 1'd0;
             PC_write_cond       = 1'd0;
             MEMRead             = 1'd0;
@@ -2279,10 +2298,10 @@ always @(posedge clk) begin
             ShiftControl        = 3'd0;
             PCSource            = 3'd0;
 
-            STATE = OPCODE_INEXISTENTE;
+            STATE = OPCODE_STEP2;
         end
 
-        else if(STATE == OPCODE_INEXISTENTE) begin
+        else if(STATE == OPCODE_STEP2) begin
             PC_write            = 1'd0;
             PC_write_cond       = 1'd0;
             MEMRead             = 1'd0; //
@@ -2292,7 +2311,7 @@ always @(posedge clk) begin
             B_write             = 1'd0;
             MDR_load            = 1'd0;
             EPCWrite            = 1'd1; //
-            AluOutWrite         = 1'd0; //
+            AluOutWrite         = 1'd0; 
 
             RegDst              = 2'd0;
             ALUSourceA          = 2'd0;
@@ -2341,7 +2360,94 @@ always @(posedge clk) begin
         end
 
         else if(STATE == EXCEPTION_FINAL) begin
-            PC_write            = 1'd1;
+            PC_write            = 1'd1; //
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd1; //
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 2'd0;
+
+            IorD                = 3'd1;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd1;
+            AluOp               = 3'd1;
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd4; //
+
+            STATE = ATRASA_PROX_INSTR;
+        end
+
+        else if(STATE == OVERFLOW_EXCEPTION) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd1; //
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0; //
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 2'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd1; //
+            AluOp               = 3'd2; //
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd0;
+
+            STATE = OVERFLOW_STEP2;
+        end
+
+        else if(STATE == OVERFLOW_STEP2) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0; //
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd1; //
+            AluOutWrite         = 1'd0; //
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 2'd0;
+
+            IorD                = 3'd2; //
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd1;
+            AluOp               = 3'd1;
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd0;
+
+            STATE = OVERFLOW_WAIT;
+        end
+
+         else if(STATE == OVERFLOW_WAIT) begin
+            PC_write            = 1'd0;
             PC_write_cond       = 1'd0;
             MEMRead             = 1'd0;
             IRWrite             = 1'd0;
@@ -2359,14 +2465,43 @@ always @(posedge clk) begin
             shamtControl        = 2'd0;
             shiftSourceControl  = 2'd0;
 
-            IorD                = 3'd1;
+            IorD                = 3'd2;
             MemToReg            = 3'd0;
             ALUSourceB          = 3'd1;
             AluOp               = 3'd1;
             ShiftControl        = 3'd0;
-            PCSource            = 3'd4;
+            PCSource            = 3'd0;
 
-            STATE = EXCEPTION_FINAL;
+            STATE = OVERFLOW_FINAL;
+        end
+
+        else if(STATE == OVERFLOW_FINAL) begin
+            PC_write            = 1'd1; //
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd1; //
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 2'd0;
+
+            IorD                = 3'd2;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd1;
+            AluOp               = 3'd1;
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd4; //
+
+            STATE = ATRASA_PROX_INSTR;
         end
 
         else if(STATE == ATRASA_PROX_INSTR) begin
