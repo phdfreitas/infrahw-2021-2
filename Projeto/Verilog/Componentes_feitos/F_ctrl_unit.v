@@ -93,6 +93,7 @@ parameter SW                = 7'd38;
 // ----- J FORMAT INSTRUCTIONS -----
 parameter J                 = 7'd39;
 parameter JAL               = 7'd40;
+parameter JAL_FINAL         = 7'd76;
 //
 // ----- END AND EXTRAS INSTRUCTIONS -----
 parameter END_ADD_SUB_AND   = 7'd41;
@@ -444,6 +445,13 @@ always @(posedge clk) begin
                 end
                 I_FORMAT_LUI: begin
                     STATE = SHIFT_WITH_CTE;
+                end
+                //J type
+                J_FORMAT_JUMP: begin
+                    STATE = J;
+                end
+                J_FORMAT_JAL: begin
+                    STATE = JAL;
                 end
             endcase
         end
@@ -2144,6 +2152,93 @@ always @(posedge clk) begin
             AluOp               = 3'd7; //
             ShiftControl        = 3'd0;
             PCSource            = 3'd0;
+
+            STATE = ATRASA_PROX_INSTR;
+        end
+
+        else if(STATE == J) begin
+            PC_write            = 1'd1; //
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 2'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd0;
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd3;//
+
+            STATE = ATRASA_PROX_INSTR;
+        end
+
+        else if(STATE == JAL) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd1; //
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0; //
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 2'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd4;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd0; //
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd3;
+
+            STATE = JAL_FINAL;
+        end
+
+        else if(STATE == JAL_FINAL) begin
+            PC_write            = 1'd1;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd1;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0; 
+
+            RegDst              = 2'd2;
+            ALUSourceA          = 2'd0; 
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 2'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd0; 
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd3;
 
             STATE = ATRASA_PROX_INSTR;
         end
