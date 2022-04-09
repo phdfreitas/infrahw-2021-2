@@ -416,6 +416,9 @@ always @(posedge clk) begin
                         R_FORMAT_MFLO: begin
                             STATE = MFLO;
                         end
+                        R_FORMAT_RTE: begin
+                            STATE = RTE;
+                        end
                         default     : begin
                              STATE = OPCODE_EXCEPTION;
                         end
@@ -604,6 +607,35 @@ always @(posedge clk) begin
             AluOp               = 3'd0; //
             ShiftControl        = 3'd0;
             PCSource            = 3'd0;
+
+            STATE = ATRASA_PROX_INSTR;
+        end
+
+        else if(STATE == RTE) begin
+            PC_write            = 1'd1; //
+            PC_write_cond       = 1'd1; //
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 2'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd0;
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd2; //
 
             STATE = ATRASA_PROX_INSTR;
         end
