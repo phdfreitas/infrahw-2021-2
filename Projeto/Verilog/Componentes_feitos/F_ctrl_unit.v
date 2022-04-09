@@ -139,6 +139,10 @@ parameter SHIFT_WITH_CTE    = 7'd70;
 parameter LUI_WAIT          = 7'd71;
 parameter END_LUI           = 7'd72;
 
+parameter SHIFT_WITH_MEMORY = 7'd85;
+parameter SLLM_WAIT         = 7'd86;
+parameter END_SLLM          = 7'd87;
+
 // ---------- EXCEPTIONS ----------
 parameter OPCODE_EXCEPTION   = 7'd77;
 parameter OPCODE_STEP2       = 7'd78;
@@ -460,6 +464,9 @@ always @(posedge clk) begin
                 I_FORMAT_LUI: begin
                     STATE = SHIFT_WITH_CTE;
                 end
+                I_FORMAT_SLLM: begin
+                    STATE = LOAD_STORE_COMMON;
+                end
                 //J type
                 J_FORMAT_JUMP: begin
                     STATE = J;
@@ -730,6 +737,93 @@ always @(posedge clk) begin
             STATE = LUI;
         end
 
+        else if(STATE == SHIFT_WITH_MEMORY) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd2; //
+            shiftSourceControl  = 2'd1; //
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd0;
+            ShiftControl        = 3'd1; //
+            PCSource            = 3'd0;
+
+            STATE = SLLM;
+        end
+
+        else if(STATE == SLLM) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd0;
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0;
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd2; //
+            shiftSourceControl  = 2'd1; //
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd0;
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd0;
+            ShiftControl        = 3'd2; //
+            PCSource            = 3'd0;
+
+            STATE = END_SLLM;
+        end
+
+        else if(STATE == END_SLLM) begin
+            PC_write            = 1'd0;
+            PC_write_cond       = 1'd0;
+            MEMRead             = 1'd0;
+            IRWrite             = 1'd0;
+            RegWrite            = 1'd1; //
+            A_write             = 1'd0;
+            B_write             = 1'd0;
+            MDR_load            = 1'd0;
+            EPCWrite            = 1'd0;
+            AluOutWrite         = 1'd0;
+
+            RegDst              = 2'd0; //
+            ALUSourceA          = 2'd0;
+            storeControl        = 2'd0;
+            loadSizeControl     = 2'd0;
+            shamtControl        = 2'd0;
+            shiftSourceControl  = 2'd0;
+
+            IorD                = 3'd0;
+            MemToReg            = 3'd2; //
+            ALUSourceB          = 3'd0;
+            AluOp               = 3'd0;
+            ShiftControl        = 3'd0;
+            PCSource            = 3'd0;
+
+            STATE = ATRASA_PROX_INSTR;
+        end
+
         else if(STATE == SLL) begin
             PC_write            = 1'd0;
             PC_write_cond       = 1'd0;
@@ -937,14 +1031,14 @@ always @(posedge clk) begin
             PC_write_cond       = 1'd0;
             MEMRead             = 1'd0;
             IRWrite             = 1'd0;
-            RegWrite            = 1'd1;
+            RegWrite            = 1'd1; //
             A_write             = 1'd0;
             B_write             = 1'd0;
             MDR_load            = 1'd0;
             EPCWrite            = 1'd0;
             AluOutWrite         = 1'd0;
 
-            RegDst              = 2'd3;
+            RegDst              = 2'd3; //
             ALUSourceA          = 2'd1; //
             storeControl        = 2'd0;
             loadSizeControl     = 2'd0;
@@ -952,7 +1046,7 @@ always @(posedge clk) begin
             shiftSourceControl  = 2'd0;
 
             IorD                = 3'd0;
-            MemToReg            = 3'd4; 
+            MemToReg            = 3'd4; // 
             ALUSourceB          = 3'd0; //
             AluOp               = 3'd7; //
             ShiftControl        = 3'd0;
@@ -1348,7 +1442,7 @@ always @(posedge clk) begin
             PCSource            = 3'd0;
 
             // Adicionar um if/else depois
-            if (opcode == I_FORMAT_LW || opcode == I_FORMAT_LH || opcode == I_FORMAT_LB) begin
+            if (opcode == I_FORMAT_LW || opcode == I_FORMAT_LH || opcode == I_FORMAT_LB || opcode == I_FORMAT_SLLM) begin
                 STATE = LOAD_BASIC_STEP;
             end
             else if (opcode == I_FORMAT_SW || opcode == I_FORMAT_SH || opcode == I_FORMAT_SB) begin
@@ -1448,6 +1542,9 @@ always @(posedge clk) begin
             end
             else if(opcode == I_FORMAT_LW) begin
                 STATE = LW_FINAL;
+            end
+            else if(opcode == I_FORMAT_SLLM) begin
+                STATE = SHIFT_WITH_MEMORY;
             end
         end
 
